@@ -1,0 +1,3001 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Настройка доступа</title>
+<style>/* ==========================================================================
+   INDUSTRIAL / SPECIFICATION-SHEET STYLE — client onboarding guide
+   Brutalist frame, legible content: hard grid, thick rules, uppercase
+   monospace headings and service labels carry the aesthetic. Step text,
+   warnings and troubleshooting copy stay plain, high-contrast and calm —
+   this page is read by non-technical people, on phones, mid-outage.
+   ========================================================================== */
+
+:root {
+  --ink: #14110f;
+  --paper: #e8e5df;
+  --paper-raised: #f2f0ea;
+  --accent: #c2410c;
+  /* Accent, darkened for use as small/normal text directly on --paper.
+     --accent on --paper measures ~4.12:1 (fails WCAG AA's 4.5:1 for
+     normal text); --accent-text on --paper measures ~6.34:1. --accent
+     itself stays reserved for fills and borders, where the 3:1
+     non-text contrast rule applies and 4.12:1 already clears it. */
+  --accent-text: #9a3412;
+  --rule: 3px;
+  --rule-thick: 5px;
+  --gap: 1rem;
+  --max: 42rem;
+}
+
+/* ------------------------------ reset ---------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-radius: 0; /* no rounded corners, anywhere */
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* Screens are toggled by removing/adding the hidden attribute in JS.
+   Without this rule a [hidden] section styled as block/grid stays
+   visible and every screen renders stacked at once. */
+[hidden] {
+  display: none !important;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
+  display: block;
+}
+
+/* ------------------------------ layout ---------------------------------- */
+
+main#app {
+  display: block;
+  width: 100%;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 1.25rem 1rem 4rem;
+}
+
+main#app > section {
+  display: block;
+}
+
+/* ---------------------------- typography --------------------------------- */
+
+h1,
+h2 {
+  font-family: inherit;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+h1 {
+  font-size: 1.5rem;
+  padding: 0 0 0.6em 0.7em;
+  margin: 0 0 1.25rem;
+  border-left: var(--rule-thick) solid var(--accent);
+  border-bottom: var(--rule) solid var(--ink);
+}
+
+h2 {
+  font-size: 1.15rem;
+  padding: 0 0 0.5em 0.6em;
+  margin: 2rem 0 1rem;
+  border-left: var(--rule-thick) solid var(--accent);
+  border-bottom: var(--rule) solid var(--ink);
+}
+
+section[data-screen="steps"] > section[data-branch] > h2:first-child,
+section[data-screen="steps"] > section[data-branch] > h2 {
+  margin-top: 0;
+}
+
+p {
+  margin: 0 0 1rem;
+  max-width: 68ch;
+}
+
+section[data-screen] > p {
+  margin-bottom: 1.5rem;
+}
+
+code {
+  font-family: inherit;
+  background: var(--paper-raised);
+  border: 1px solid var(--ink);
+  padding: 0.05em 0.35em;
+  font-size: 0.95em;
+  word-break: break-word;
+}
+
+strong {
+  font-weight: 700;
+}
+
+a {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+
+/* ------------------------------ buttons ---------------------------------- */
+
+button {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border: var(--rule) solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Primary actions — the thing the reader must actually press right now.
+   Distinguished by a thick accent border (border/UI contrast needs only
+   3:1, and --accent on --paper clears that at ~4.12:1) rather than an
+   accent fill with light text on top, which would put button labels —
+   16px bold, below the 18.66px "large text" AA cutoff — at ~4.12:1
+   against a 4.5:1 requirement. Label stays --ink on --paper, same as
+   every other button, so it is unambiguously AA-compliant. */
+button[data-action="download"],
+button[data-action="copy"],
+button[data-action="qr"] {
+  border-width: var(--rule-thick);
+  border-color: var(--accent);
+}
+
+/* Secondary / escape hatch action. */
+button[data-action="switch-path"] {
+  background: var(--paper);
+  border-style: dashed;
+}
+
+/* First-choice pickers (device / problem screens) get a spec-sheet index. */
+section[data-screen="where"],
+section[data-screen="what"] {
+  counter-reset: choice;
+}
+
+section[data-screen="where"] button[data-choice],
+section[data-screen="what"] button[data-choice] {
+  counter-increment: choice;
+  position: relative;
+  padding-left: 3.25rem;
+}
+
+section[data-screen="where"] button[data-choice]::before,
+section[data-screen="what"] button[data-choice]::before {
+  content: counter(choice, decimal-leading-zero);
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* -------------------------- profile / status bar --------------------------- */
+
+.profile-badge {
+  display: inline-block;
+  margin: 0 0 1.5rem;
+  padding: 0.35em 0.6em;
+  border: 1px solid var(--ink);
+  background: var(--paper-raised);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.profile-badge:empty {
+  display: none;
+}
+
+/* -------------------------------- steps ------------------------------------ */
+
+section[data-branch] ol {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  counter-reset: step;
+  border-top: var(--rule) solid var(--ink);
+}
+
+section[data-branch] ol > li {
+  counter-increment: step;
+  position: relative;
+  padding: 1.1rem 0 1.1rem 3.25rem;
+  border-bottom: var(--rule) solid var(--ink);
+}
+
+section[data-branch] ol > li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 1.1rem;
+  min-width: 2.4rem;
+  font-weight: 700;
+  color: var(--accent-text);
+  letter-spacing: 0.02em;
+}
+
+section[data-branch] ol > li button {
+  margin-top: 0.75rem;
+}
+
+/* fallback / spare-server callout */
+.fallback {
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--ink);
+  border-left: var(--rule-thick) solid var(--accent);
+  background: var(--paper-raised);
+}
+
+/* ---------------------------- troubleshooting ------------------------------- */
+
+.troubleshooting {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: var(--rule-thick) double var(--ink);
+}
+
+.troubleshooting ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  border-top: 1px solid var(--ink);
+}
+
+.troubleshooting li {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--ink);
+}
+
+.troubleshooting strong {
+  display: block;
+  margin-bottom: 0.3em;
+  color: var(--accent-text);
+  font-size: 0.95em;
+}
+
+/* ---------------------------------- QR -------------------------------------- */
+
+.qr {
+  background: #fff;
+  padding: 12px;
+  display: inline-block;
+  max-width: 260px;
+  width: 100%;
+  border: var(--rule) solid var(--ink);
+  margin: 0.75rem 0;
+}
+
+.qr img,
+.qr svg,
+.qr canvas {
+  width: 100%;
+  height: auto;
+}
+
+/* --------------------------------- motion ------------------------------------ */
+
+@media (prefers-reduced-motion: no-preference) {
+  button {
+    transition: transform 120ms ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+}
+
+/* -------------------------------- wide screens -------------------------------- */
+
+@media (min-width: 640px) {
+  main#app {
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  h1 {
+    font-size: 1.85rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<main id="app">
+
+  <section data-screen="no-key" hidden>
+    <h1>Ссылка неполная</h1>
+    <p>Похоже, ссылка скопировалась не целиком — в ней потерялся хвост после решётки.
+       Попроси прислать её ещё раз и открой её одним нажатием, не копируя руками.</p>
+  </section>
+
+  <section data-screen="where" hidden>
+    <h1>Куда ставим?</h1>
+    <button type="button" data-choice="android">Телефон Android</button>
+    <button type="button" data-choice="windows">Компьютер Windows</button>
+  </section>
+
+  <section data-screen="what" hidden>
+    <h1>Что именно не работает?</h1>
+    <button type="button" data-choice="vless">Интернет есть, но часть сайтов и приложений не открывается</button>
+    <button type="button" data-choice="wdtt">Работают только банк, госуслуги и пара приложений,
+      остальное не грузится — обычно так на мобильном интернете</button>
+    <button type="button" data-choice="unknown">Не знаю</button>
+  </section>
+
+  <section data-screen="steps" hidden>
+
+    <p class="profile-badge" data-profile-name></p>
+
+    <section data-branch="vless-android" hidden>
+      <h2>v2rayNG (Android)</h2>
+      <ol>
+        <li>Скачай приложение.
+          <button type="button" data-action="download" data-url="https://github.com/2dust/v2rayNG/releases/download/2.2.6/v2rayNG_2.2.6_arm64-v8a.apk">Скачать v2rayNG</button>
+        </li>
+        <li>Открой скачанный файл.</li>
+        <li>Android покажет предупреждение, что установка из этого источника отключена, — это
+          обычная защита, а не признак проблемы. Нажми «Настройки».</li>
+        <li>Включи разрешение «Разрешить из этого источника».</li>
+        <li>Нажми «Назад».</li>
+        <li>Нажми «Установить».</li>
+        <li>Открой приложение.</li>
+        <li>Нажми «+» в правом верхнем углу.</li>
+        <li>Скопируй ссылку на профиль.
+          <button type="button" data-action="copy" data-link="vless" data-host="host2">Скопировать ссылку</button>
+          Если удобнее сканировать — вот QR-код.
+          <button type="button" data-action="qr" data-link="vless" data-host="host2">Показать QR-код</button>
+        </li>
+        <li>В меню «+» выбери «Импорт из буфера обмена» — профиль появится в списке сам.</li>
+        <li>Нажми на появившийся профиль, чтобы выбрать его.</li>
+        <li>Нажми круглую кнопку внизу экрана, чтобы подключиться.</li>
+        <li>Android один раз спросит разрешение на создание VPN-соединения — нажми «ОК». Это
+          стандартный системный вопрос, он задаётся любому VPN-приложению один раз.</li>
+        <li>Открой сайт, который раньше не открывался, и проверь, что он загрузился. Если сайт
+          покажет, что ты заходишь из Нидерландов, — так и должно быть, сервер стоит в Амстердаме.</li>
+      </ol>
+      <p class="fallback">
+        Запасной сервер — на случай, если первый перестанет отвечать.
+        <button type="button" data-action="copy" data-link="vless" data-host="host1">Скопировать ссылку на второй сервер</button>
+        Учти: из России он сейчас чаще всего не подключается, его блокируют по адресу. Он
+        пригодится в поездке за границу или если обстановка изменится.
+      </p>
+    </section>
+
+    <section data-branch="vless-windows" hidden>
+      <h2>v2rayN (Windows)</h2>
+      <ol>
+        <li>Скачай архив с программой.
+          <button type="button" data-action="download" data-url="https://github.com/2dust/v2rayN/releases/download/7.24.4/v2rayN-windows-64.zip">Скачать v2rayN</button>
+          Он большой, около 160 МБ, — внутри уже всё нужное, доустанавливать ничего не придётся.
+        </li>
+        <li>Распакуй скачанный архив целиком в отдельную папку. Не запускай программу прямо
+          из архива — иначе она не сохранит настройки.</li>
+        <li>Открой файл <code>v2rayN.exe</code> в распакованной папке.</li>
+        <li>Windows может показать синий экран «Windows защитила ваш компьютер» — это
+          стандартная реакция на новую программу, а не признак проблемы. Нажми «Подробнее».</li>
+        <li>Нажми «Выполнить в любом случае».</li>
+        <li>Скопируй ссылку на профиль.
+          <button type="button" data-action="copy" data-link="vless" data-host="host2">Скопировать ссылку</button>
+        </li>
+        <li>Переключись в окно v2rayN.</li>
+        <li>Нажми Ctrl+V — профиль добавится сам.</li>
+        <li>Нажми правой кнопкой по добавленному профилю.</li>
+        <li>Выбери «Установить как активный сервер».</li>
+        <li>В правом нижнем углу окна переключи режим на «Системный прокси».</li>
+        <li>Открой сайт, который раньше не открывался, и проверь, что он загрузился. Если сайт
+          покажет, что ты заходишь из Нидерландов, — так и должно быть, сервер стоит в Амстердаме.</li>
+      </ol>
+      <p class="fallback">
+        Запасной сервер — на случай, если первый перестанет отвечать.
+        <button type="button" data-action="copy" data-link="vless" data-host="host1">Скопировать ссылку на второй сервер</button>
+        Учти: из России он сейчас чаще всего не подключается, его блокируют по адресу. Он
+        пригодится в поездке за границу или если обстановка изменится.
+      </p>
+    </section>
+
+    <section data-branch="wdtt-android" hidden>
+      <h2>WDTT (Android)</h2>
+      <ol>
+        <li>Заведи отдельный аккаунт ВКонтакте. Это обязательный первый шаг: приложению нужен
+          свой аккаунт, через него оно создаёт служебные звонки, — личную страницу подставлять
+          не нужно. Подойдёт пустой аккаунт на любой свободный номер телефона. Звонить никому
+          не придётся, и держать звонок открытым тоже не нужно.</li>
+        <li>Скачай приложение.
+          <button type="button" data-action="download" data-url="https://github.com/SpaceNeuroX/proxy-turn-vk-android/releases/download/v1.4.1/app-arm64-v8a-release.apk">Скачать WDTT</button>
+          Если установка не пойдёт — рядом запасной вариант, универсальная сборка.
+          <button type="button" data-action="download" data-url="https://github.com/SpaceNeuroX/proxy-turn-vk-android/releases/download/v1.4.1/app-universal-release.apk">Скачать универсальную сборку</button>
+        </li>
+        <li>Открой скачанный файл.</li>
+        <li>Android покажет предупреждение, что установка из этого источника отключена, — это
+          обычная защита, а не признак проблемы. Нажми «Настройки».</li>
+        <li>Включи разрешение «Разрешить из этого источника».</li>
+        <li>Нажми «Назад».</li>
+        <li>Нажми «Установить».</li>
+        <li>Открой приложение.</li>
+        <li>Перейди в раздел «Профили».</li>
+        <li>Нажми «Импорт».</li>
+        <li>Скопируй ссылку на профиль.
+          <button type="button" data-action="copy" data-link="qwdtt" data-host="host2">Скопировать ссылку</button>
+          Можно вместо этого отсканировать QR-код.
+          <button type="button" data-action="qr" data-link="qwdtt" data-host="host2">Показать QR-код</button>
+        </li>
+        <li>Вставь скопированное в приложение. Если оно не приняло эту ссылку — используй
+          короткую.
+          <button type="button" data-action="copy" data-link="wdtt" data-host="host2">Скопировать короткую ссылку</button>
+        </li>
+        <li>Открой ВКонтакте под тем аккаунтом, который завёл для этого.</li>
+        <li>Создай звонок.</li>
+        <li>Скопируй ссылку-приглашение на этот звонок — вид:
+          <code>https://vk.com/call/join/...</code>.</li>
+        <li>Повтори это ещё два раза — нужно три разные ссылки. В профиле заранее выставлено
+          9 потоков, а один звонок держит примерно четыре. Если добавишь только одну ссылку —
+          не забудь снизить число потоков до 4 в настройках, иначе соединение не наберёт
+          скорость.</li>
+        <li>Вставь все три ссылки в поле для VK-ссылок в приложении WDTT. Разговаривать по этим
+          звонкам не нужно, они служебные.</li>
+        <li>Открой вкладку «Туннель».</li>
+        <li>Выбери свой профиль.</li>
+        <li>Нажми «Подключиться». Сначала попробуй режим <code>raw</code> — он быстрее; если не
+          заработает, переключись на <code>wg</code>, ссылка и пароль останутся те же. Первое
+          подключение может занять до минуты — это нормально, просто подожди.</li>
+        <li>Открой любой сайт и проверь, что он загрузился.</li>
+      </ol>
+      <p class="fallback">
+        Запасной сервер.
+        <button type="button" data-action="copy" data-link="qwdtt" data-host="host1">Скопировать ссылку на второй сервер</button>
+        Здесь второй сервер работает и из России тоже: трафик идёт через звонковые серверы ВК,
+        а не напрямую.
+      </p>
+    </section>
+
+    <section data-branch="wdtt-windows" hidden>
+      <h2>WDTT (Windows)</h2>
+      <ol>
+        <li>Заведи отдельный аккаунт ВКонтакте. Это обязательный первый шаг: приложению нужен
+          свой аккаунт, через него оно создаёт служебные звонки, — личную страницу подставлять
+          не нужно. Подойдёт пустой аккаунт на любой свободный номер телефона. Звонить никому
+          не придётся, и держать звонок открытым тоже не нужно.</li>
+        <li>Установи WireGuard — без него клиент не сможет поднять туннель.
+          <button type="button" data-action="download" data-url="https://www.wireguard.com/install/">Скачать WireGuard</button>
+        </li>
+        <li>Скачай саму программу WDTT.
+          <button type="button" data-action="download" data-url="https://github.com/IGOR7276/proxy-turn-vk-windows/releases/download/v2.1.4/wdtt.exe">Скачать WDTT</button>
+        </li>
+        <li>Нажми по скачанному файлу правой кнопкой мыши.</li>
+        <li>Выбери «Запуск от имени администратора». Без прав администратора программа не
+          сможет создать сетевой интерфейс.</li>
+        <li>Скопируй ссылку на профиль.
+          <button type="button" data-action="copy" data-link="wdtt" data-host="host2">Скопировать ссылку</button>
+        </li>
+        <li>Вставь скопированное в программу.</li>
+        <li>Открой ВКонтакте под тем аккаунтом, который завёл для этого.</li>
+        <li>Создай звонок.</li>
+        <li>Скопируй ссылку-приглашение на этот звонок — вид:
+          <code>https://vk.com/call/join/...</code>.</li>
+        <li>Повтори это ещё два раза — нужно три разные ссылки. В профиле заранее выставлено
+          9 потоков, а один звонок держит примерно четыре. Если добавишь только одну ссылку —
+          не забудь снизить число потоков до 4 в настройках, иначе соединение не наберёт
+          скорость.</li>
+        <li>Вставь все три ссылки в поле для VK-ссылок в программе. Разговаривать по этим
+          звонкам не нужно, они служебные.</li>
+        <li>Нажми «Подключиться». Первое подключение может занять до минуты — это нормально.</li>
+      </ol>
+      <p class="fallback">
+        Запасной сервер.
+        <button type="button" data-action="copy" data-link="wdtt" data-host="host1">Скопировать ссылку на второй сервер</button>
+        Оба сервера работают одинаково, в том числе из России: трафик идёт через звонковые
+        серверы ВК, а не напрямую.
+      </p>
+    </section>
+
+    <div class="troubleshooting">
+      <h2>Не получилось?</h2>
+      <ul>
+        <li><strong>Пишет «RTP AEAD auth failed»</strong> — ссылка устарела после смены пароля,
+          попроси новую.</li>
+        <li><strong>Просит капчу ВКонтакте</strong> — в настройках переключи режим ВК на вход
+          через аккаунт и войди один раз.</li>
+        <li><strong>Подключилось, а интернета нет</strong> — уменьши число потоков (например,
+          с 9 до 4) и подключись заново.</li>
+        <li><strong>На Wi-Fi работает, на мобильной сети нет</strong> — напиши, на какой именно
+          сети не получилось.</li>
+        <li><strong>Совсем ничего не работает</strong> — пришли скриншот вкладки с логами.</li>
+        <li><strong>Проверил свой IP на 2ip.ru — сайт не открывается</strong> — так и задумано,
+          такие сайты закрыты специально, это не поломка.</li>
+      </ul>
+      <p>
+        <button type="button" data-action="switch-path">Не помогло? Попробуй второй способ</button>
+      </p>
+    </div>
+
+  </section>
+
+</main>
+
+<script>//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+      define([], factory);
+  } else if (typeof exports === 'object') {
+      module.exports = factory();
+  }
+}(function () {
+    return qrcode;
+}));
+</script>
+<script>var PROFILES = {"55c3f99d":{"iv":"rlUfguzauUM_tXQA","ct":"mswRvUmJoe1mwUG5NgduOTK8l6-UNC8xNX07eNC505tqA5f4W7xsryTVXV4_oJ9aQ3AhIWK5Z_ZAXX2JVCKEIezvH_AzM0SrNzA_4lBxXM_I4kTJ0A3qXQesMsBwu1YaO5xohoF7NN6BQe2sAclrjiSjLbLeYUBDDLl-mWbfd361v54g2qCXKCi0w_zGYo431DmQxjc9__2PiAJm4dwDH0Fu9V6zhR9TLxgCyKv7shLbwi9bCSyAoeFGqXWdhxfU29WFf3MZeZWqpd97dON7UH_514XDH_AZQIbIQFoquBSbC_-kfqKiyFE2gUQ3GToArnL3-mwvCYJf0xevchFaeZAptl5fPihMxVdd2dlFZR7ciTQPAI7Dn7LoZOnTv8GKTOoP1iYzz0q2aMMAJ4frvJ94hXTM-McOVRzSZA9o-_CyVRfWrUWCcKDDP3MCF_dAwSWjVeCLRl53-TNxq0nTtJbfCArwBI0cDuKDLW4lII7rthqxaRW2_5KpuHLzLzbd40Zn3QG6rhRHtE9IHW0uivYiRBCIPGzeW4fv-4dxovt5cSIURB8Zh9-3DJ17GvshtX95xfwamnWYCd66VeaSZypO2vlNnId0X6c5lFInNrWCZwbWNR4mOCTBdCRZJmvYJ-Qqyw99_DGLniV2cw04YhFhosE8C982E1IPWTR-i8j_nRqFk423Sd8h07AaPIK_lePIJulg13KRwUAJK7yhnDq78MI027jcPVUt6Kfcq7zxsmzCdvrQ67JQRSVQh8iTxIjj-FFXm6AsFi7pyL7SFtf8EZ0xrZvNkJdqsJMnpvZTfAgcmO0kcQAUqxd1X5b7IZZhYZFYFph5-TQ6PCIp-NSZ4uLmApbwzbhI56Ii4hM9iT5k3OJDX0U9iqfbHWb4rzpLoJ6e3LPjkpvZK5lVz8YE9_1rZtLnYxQ4jOn_aEBWwKO442-DbyKAyokPiJl4K5yoPxd75az84UobQmBcHDEc5pANbUawcz1A-B1mEZWXWZRXyABsc6fMdYZQeJNREaFyjXgbookyReT6JoeefIE11xFDQGMDIpoYp2OqVKsbZilphJZK6tZeadFvzeNjceQR-lIM_-JItb_q9Ysr9JXpTvub-S4HLvEheLooosly8MEcX7HZOVAbOFmhQPJVgEyIfQ9h6LIwcGxZsCzWQgpeMWsMsfr-7xXSj6_bYjC7oovaPyr-b7zd_apoxpu1aukkAMQTKX-7TKpus5T0XRlj50FgI3HktwXrmxX2R5aCkaml1aqc18fU7L87B5VWTC_IVPjleO2wVZNqvrZJmNpIytsKq83NIgv2sK9rGW9pb5BZMz2Z4kVFoaOq8vry2RYtAPHeCOKSYzvjQkYK1a12yAFz74XpFYw"},"1581adb1":{"iv":"7EL0vLZ316poFel3","ct":"PhVkkP8w-SB1vWzyeRR2uPlnl3PFk5NO0n0XMPezZf8etHzrCGx-ahJtYAv7AvDr4Jl01ZeH2MIYuIo8w0DkJRqD0vDvdDfRdDeAnWDeXWDW_rcdpHnc5uRcGb-5U8pK9s9XaXMpbds6LcmwGktMMFcWCKgr0elrzxYG_WoiDLvHmAdlVuwJrSklif0crbbTO-1Kwz3DgYQR7tEPHQt2Tv0h9pWYLYgRSwFKN383yCIt3gKqxr52FYB3d1B-xKtxtu-7_tDAHUsq75NviTMzVlCfhNHPsGjh3jd-cPE_2EiTcVO3Keq-H1xMHboevADy_Y5j3088Fyt3UITx2W3x7UmT0AEMSK12OoMunbqRXiuCq6Kv5N34nw8oTiCa9eQQRDtoCv7nkDogNLpRFVElhQwR8Hm-aJ3Ap17lxOJcMiwpd_4JiX3dCYHGDIov2Np932JsW8i0wKxArj3BOGjtXm82TCHsCNc0PY5uMiiG0kU0NEMPVoM5a_6iN4Xgd3IroN8p2KOvmTSFL6A1yh6DHyl5sYYOpehxrEPWNUvACy9rvaRW7tCqGnZ6w5NpVsOAsqJKPvtip-30ShqsSdFEMx1YRH501JkaYX4PvY2aWO-la1y1RBEIdkMnjEmWbCzrgqseFUfBAdzCnS4zzqgFzA1UEcNa0Iq2KduqZtH2XlL9XCiT4Jyt2fx5Kbx9rvkKdH1x1j5aUOsb9lQLPiDKmz42oWmTHZ7gB9U8A2G7ixLG0XRS6IzP1E_NSP9R0W7cdSDUrgy5JnGK45QW4Of3N8X8TQyMHvTUQbUnSkBVqp5AgjV-nGuKbW014-SJmK64uElNxWAwvQbZdRiuGTGstfohnWMtrG4dCET7AcctZyboEqqUnf0gI1IrJq1PFjbmkCDtm8thiDyOavk7SopwDqhEeC-OkHeGRFX66Fa20K9Fbe-LNg_8Vlb1mYXIkCY2Kx-CUT2tA4uBT0kYTolVeLxgOaTpbAS0fsfaPXEMw2ZicklivJ5P-p9ebkRnsjc44A3ueRdectRsrO8OrKEE8pdD0qpOFYCQWjLiL6YRlhmdqsnmS1Jkhfn6G-ur0VCHDWoQO26qY_mvOLafT3kNOwt2y5Pe_fzA9Zokz0aew7fcWwU9kBfVsgbXaOJuYxTYSFWvQf-Dk-xaBDWnntGt5o0ABtAEJNqf3tGnf-EoOlbS89HLeMCcm-WqIlH7oB1yMJMwBV39ELaLWK7G7LiUgrCRk231XxArnxUYbWHwlg86_BqBC6qv-GEprWS4C94LFl4o_w3BajfCewEnhtdkzIQegp1TX4oTQ0YqPXUk_-j3tzvp48knvdT_5TRQ2nAMWArn8bKH8ZONJ3OHRrSrseeUpxP0Dc7hai0Mc0u_8wyC25gDN9aO1DSUAq6o0F9eWtk1Edt8YA"},"bf545be6":{"iv":"wtoG_INFyFguzR5F","ct":"5vf0WE8yBCxgPjzwrN8FZ1JXfVW9Q5PBuixQc2B7x-H6ulBirtItlgQrJyJFgWioLP5uHUFmD1BPhjfROFv5wq47mzCMl4Mkktn00JS0OS_vF37KERIv4NiDJvpp8lGkrw8xVIDnh_Wtt3hNFnSVFT4DDB7JNGSyycyvAIbqUWhJ_1slpsygUizqtyZ7H52mbn6fYIKVjQBnVPM9mWHGzOX1ad1uPmOUQCFJ4CXICABWOVRWiEzF5vifj5t3lJMtb17bUEKVbFy4dTC1qN63FgDO_sG8FJNlw8HCZHFsx5NB70Hu-NY8h_kvwpxrI-lQxmhkNy-tjbnj7hK3ZT_1mc_SYxW8L9Pa9skBKDPr71-Y2UV8yctLujlT-cn_Qy50dVcRsBQjTK1Met10jxdg0lqorUn4eGP52XAIVR8z-mae41_mu5caeQlF2zS0s2g5LngZmrTifvXEa2yNoFJfKKQQUeyFHkyaqlvDeC-txDoPCVZLyQABO0IuwQV7-bhUUC8W4zpHJR0v2Ks3pIrr3PDcoNnZbXW5aax4cylcf9ZsOtW_dVW84In2_LbS68pxcvHSKoQdwg54ced_9Q9sqhEnlS47Z5PQmt52X9W-FtpPf2eH0y-Baff4Xwz3yKyTZzyINZTPpsaenvfp0D6niBIxlQ-M5fOa5rgmoNCN2r_5p8xoW9qzkSG7VSGvur_cGY-gO2bIObNvgzGRJvQkjfscd_8ae-CXQg2DgLKkxe21RXfMHi4fJW8CmERU_fP_SpFqHgVrYIRBhd-jW6wJueVuNnjEMkxVQyLa8TNpUpdMjzbxQsoPt00yb_oSj6hHzPASQA4h9zZIRh6Ou6k2LqM27FTS9cG7zHWNTDbKmuCRULNf35xx9D6PSEt2YB0W3pmujNp9EmBJrFkogLAlHwaSmAAFC-ClEZWPqdJ3epntbxW-yk7jQiXnaAO2d4SJs1Aq6klqvpNz7tEcMNWcRW5ATc9ynwJpFTmtgo7Vo70XGWOZb7BH52amRzcFzE9SQW2_D8WGsg8qf45FgT45D9rHrdDgC3xV-A4DIR2PNMN25nxnYhOIj6NpxCsTUCWbrpT5l6FtcYM9CEdZBVSU7M5NejSqc5xnY2QNjKzriO2cyjREeGjSKWm4g5wJcbh4M11BtOtHBDa8fbANP4Nr3fv-0XTRQSbCRK0Yejyam19J4fqwNuoDnVtwnBWE_Z17iPTQ0Gu4eB7NJXHYXxwCFk-Wb1qtKQU83yt_3q3hhiuWYJHC2tPC1NXiyuZBXhtpqRuwvlJ2pWFLJ-crPLX699HvoWOIpA-p_bwDrCA4ypgER7bin8QlGNLHoI0KgUj-DGUQRvD8-D_ea-AMBkuUpEGPt8TkenBm7mLxCGYL3EL6bxw1QpLTpg"},"e0d291ba":{"iv":"mAWJ0doKxjq9IPrj","ct":"ZwVU48sB7Dp1ly3DycgEE6CEWNYC38yyxJXCdxqNWv22mKXe-3NoK4pUcN3-qbCFyRGiVgAZYItyP2xcDJSZJy5Nrl2Ib2AXKmuY1jz-X_CLbjAYLvWCwr91RIhGTik1TRi_jB83OuB8h0HSSp9RNQAls7mvQsbkvdANSBS7mFWRceEU1OIlDPsbsV4rWKOUySvaDDgJR2bgi-FkHKQHVhc3kvJ7L2S-_zl07TQHPUh5TkQwDInveYPvBH7_3f7msbFlY9C8AtliKJo3DmX-xFUPsBbrO3FyZvipqkBD5W2mwsfUqKMN0S9c9Db8xBLIIHfGGRvIcwjdKCnxmXCMN8e_N9IIZy_o6AqSsXH4JaMIbD20HozTdkIxj_2oMua6a9gFp5LkE046q-dWiHCg8Mbuos3oWNBcwb2uOvJk_Jm-iHygJbZCHyTnu4OI_FLWfVZz6UvZeZjXJ6M-vDd75YVp6eOd8ZYxvm0b81_IYijfIDpOPxkP5VfwchttIOFrhkIMw5keMe7nDuyanVnPTDTpNxaVYCUqqDNv1VV9lEu1ZGIbIVAJ8voHGuOFbZt9zRnaqd9eWQaWSr0Uyq1gFn4wZ-3z61EedZY5TYw70TEMRF8nAJtFF74N2HqRQXUbGzVh-VpY44BDJ0FE5rfzFkSNTVcyUfVyIob_WfgJvbnypDRVpS2Jh7AE_tmMisx-Qi2M6fjO-aK5DKXPepY6EY1w_WH7axUJtUFlfH3NGdYw2O7tETvdaJHtcSEEBOiEVIUpqZqzjNvBFVJ7QqdPI6uUAqkwJQcqTwsQsarfQMM-gSU6cxMPd_tzO9cry3MZp4n_CHu6H6GaiKk129bdeZijHpgHAMcTki-baGzumGZDLrvKBDPfUGooMj3PXv6kkhmLGzHAqmBZIBZuFFZNlPGCaauGF2UJDlNS8JzhI491bOlo5CYmFumqOV2Z5HDhNPO9O3fu4ZNuwxEQO6sljd6cPlEgpXaWBtyBjDZwCikwKxTn8EssdPdqURGUMkXPJstZXEMlfUsTqfoNhvc1fgwqEdvffSK5oyZwvcERKKnkgNkzNtm7O9A9pY_wZU-bwSCZ0TbpzCK51DWYlPW4PeJXFiNcO8O2FXRvCQD5aawQacyR9OiUcIaddGbJIkI7lvGvaNAf3AD2V8YG0WUprjvZKwy9OJJUAlzoMxqKMTixA2fN2dN3Xvw2AmQakOyOpBnPn4LyuvAguJCd2JAt6m3R_-1Xq09pLPyMYFMvNd5p21XnbuMNpwb_b2zZMtsZLnZgbDIFCVQmFpYlRcsQGd93DkXYXMgA9_ma2-IGDc57CM4nJOt3u_SLrDeVtMW0DuppNrmWvZ0NruMHUQtChrY"},"cbc82fc3":{"iv":"p8icTUFDWLetFMRB","ct":"50H_JH7yf2MAlvKcU7fP8r2Xoz8z6NfshR044BNL1e_MEu_FM2ao8RSHGkjBpHqFFnitYPeVd_0j1tQBpVbIde9_Vl6mlnwDzrt1e6SBAE4RJrFswQ4l_L8U1jtrvmfknbNwG19VWcrnbNfESbECQmansj4FMRoWXyaZU1pN4SbmuyRJouImQRIWItO5PNdJ0d3cSyErE5v4V90pPMsjXzSS_YrUAZXpyyfYYSKyJ2stS526NTGtx64sL_02_GMpcH5F-Yr-r24_oHTK6lWuYul70ojUwV6Fr2IRmVOg_-lqKtVcA_9peC43FVM65PhHp2D5AYrZ_TDqrWQO34aAOYPSkKMpdXki3yYQ4jjjU17X3vVVEF1S99gbdPBJaYnLmZmqyh-FXZhfLnLdGFk7EuV5lP6xb5NvnII_Tpkxn4m5eONx_X_emTPQijLaG112JM0iEbNacpXRK1cyz7NL_LgIpPMXPuWgS-OVeFdlZ7Z5L9Ia5b6BPsZ7OyoXWPLsAmtRGAMvKyPWkW6ZEqY2aZyaan13tbNyKzlHMNT9s6b4LEC-IwEcXgBuk3HWmK7dQsiRHJt-rMZoepRYhTGO0QQuH27K_Ih-hUrj9NxW_veNjQlFWP_utbCHK9TI7wRcnB5qFhiviGEk90j0eqFfKRvPKtJ0icf1rb2sYidRB-nX9NSj9hhGg8qtKKK9M3Chf6FX88ObHQ9ERQIrp5NfXjleoj7ShoM_Lhj-iD7fFV-mdYxyjje6mZwNMQvm5YZE0scgyYc6S9-BCNrORSSg3R5PfAQyrtLSDywb1OsrpBrp_Re9xYqdgPZGRBQlA4tF7eHY4WsZLuozm0lQGmEKsLGblio8TT9SpfcdaGVtd24nPYrbwXLUEWtN_-SHsg16ZT_B1hRQC55dcl8mami9EIDl-a_mAdG7OgPD94DQPTsjfCYv1juFGQiVIbkZE7agW9BJvtXZxZwC-r4PQoPw3FWSJCv9CfjpXOZFYnfdGWU_FLa2R3DMg6ccob3NAQGK4yV6oi2cut7_dzJQGFw3saue9ymbJXki2iqSqIX2ReDuZrur5YM1xT62Q6nvU6o38mbLe0x0TZ6YyNgrabjXgu8EB3x--n_SgTQA2x0FUKFsbknu4zLnLH9KN9VoiXQI5lq_39XkIp5mg9yVcmvbGp5My2JQhtLDR33hk6hMtvoawMmVmWcSxtQDO6cogBxVRxQMe9T_gM28zOsScEfy7im9qMfM44X2mDLBn4t0O70J9MLnkLaznqeseGazqhsQhVrxJ0nGeKtU6CJhlquo9YrqSXEz5HU0B-WnM_8GC47KkSK-kIfwmadXBVm-g-4xKq87z2iM0DuaQfp2DexWE3lkk3o8FOmdGhHqchslSPu_ZFbynwc"},"ed1d9eb7":{"iv":"GrjGVrjVqL3dAIBg","ct":"9RLUKLhieqMsmJ7umiFFxnZAnJZOjGm2nFzmOJKnJsHQfL0jOOVJHBoP91THSyGrTKRZyNAmYOPoSn2xdx27g0M2khtoQEN2NO5yeSrKXASf8b-00erLEG_rWcOz0bhAIEYN_x7omF0agcYrac6XLvYJuPQfcAuOkuypKZStpS8yw3Fqrx3KaPFBjBzrieoN0JvrEjiiRiVdHPUAhe5rZLo2edDzJ5KvAJI3CiXx5b9sHTBn2RrL8u1Ef_C7rO52mDivf8ORTmy1VaKuKgn0QiJiRFWt2_JDFZx0VY7WhKw7rNt2EgLDQxyYCK_DSGlMvAJE8px9Ung9u0R_NP_CdYTqezBURrS6xUnnN3JX2EwDcCDwsuSHUYVJH1rfp65tdJ7OvpjglN3hkSJEjF0gSjx_ELPEPfMwZirWU5DO5mEeGfYSHYhoFU4KNp5eLeLO2jg5cuuOF4Ov3oiup2ZD3BnS6BxrSyBStVzku_N8WfPapSSoy8nMMqWQZZtEvX7aX7diXpI1qAeIqsh6ql-ukrfvq9rBRN0BN-wA2GpJeACpxLzAK4_l1aIO_m3DesbzlhOZhcfyvW2hzCg9aMiTq8hNf6DrzdrcqVR9bxOvvTYVdBAJ6lZpGyQFD9tDB53hA1bmAowcGmglCh_3FNi9YVu9tAFYq8odeIjWk4wrFvL5kW-vNnwDBuTthsUupOR2d4So3PE2IhXxSpzcytkJGDpJEWdOt8ezf-PucEw8gDXxuu1nFmWFwRwob8cXNjCOSu1NhZ_zmzl64r7PXa8erGv5-G_Ly5jgfDb52K6MsN2cuDdzW3ztf7MW3AXho8ta9MDVu4Ju6JvkD90ODmZPcWxizNKvQ8XrJtIvaHv2-G7n_d8vZjrReTfx7kQigK4_kLi5_Owjk4094RJuXcR3E5vzNyxYPoxSQDVUf8_LaaByjiMtPkD9S3C8tjobFAIKKx5E_cEUgZv_9gvObL3li06f-QPvdGCZegyRL78kUTVLu4_jIeGOMNSNyzH5Rknbvs5GW_wwrhDRiNWY4ld5fpHJ5BZNGV0ZwT1ZfuS0bXZPI6QqZ85eZ5d2yhh0usXekkkowMshOH-gaNHIfXjUQInryRbrSHt74WymRRiR07J1i97lwyPwmLQVBtpL_fuyAYAl5mWsBjz7zB5uj0Djh1Y7C3ItThpzs8_WTyWowBZginutzUx4zkmtlzE4pntPLptB0DoeUxFbDXMPvtNhBWjPyXfnAKYZef6_zYUXXyp5lDZYqcGLkViezde0BkWP-i8Imt50-rEsDU8GqF6GXA5SaICl5ALSaoVtypPuAnAzPAQ7J5ZVjzDkQk1UaoIhVFp6J5w_CSEl-Cjf7LLS1RV6ffEf94zMR3AjFVt9EnQbMRn_TKV5rW5mlyLw7nSttPiQrftbc-0bWJFSjQJXOXi4yzKP"},"052681f0":{"iv":"OWErArz9ee8FBrLp","ct":"23dZpduS3yuxCC59vgpgsVtXy28X_PYEAN3xywBwCfNpCzUgLhE8DmmGjQgGsm8-JPOluUAQjAh3iIfbl1_O0mhKUwtN3bi2SyUnRRK43VTVFcLSuNXjbIk0hrKq8Qd9hN017CM6AcD51phI_o0F-SEr-OTljJi_QZ039156epj-WOAy3NsQaOnEXm-_AvIQ0NnJUVRhoLNcZQMco23sn3AvDCiUSllJ0yMpxluVoSmcoDHWTkjtZx_5KtKwUgfHMUazuJwGVaXA4sBYATt4jKtUpBY-xET05YURa7lb-qp4lmn733UB7IcZJILSCoOXLezTibMl8Ou2DrmzFcXdtAWzBJzRoPLqNHx8o5o-KsuhjPQDAfPcmNL-e7LkcQ0TP_WWDIdbCNlWXlm4TxV1KBerHFt1QENph2zpk85C4oqHi94x2ZRQz-S1rNJdNCfmf5vbSE3GdZHA2SHzozyxxfolR2p_HKkzgQZ9zi4k35hZy-8VO3hYIZi-z2ARryEmHyz7ero62Hcjs9XXDPmJozGzrQzY69WS5HeITaIeUNhMwqN_6qaNfBM37nGJ3m-7T5VKkp8HI7z7yb6xQKX0Eoifz0aBLIUrBXNcCwYYAUhCba7IiDfaA8pDGGZNO-CYjb5AAgbpfkp9jqjPvR_Q6pAvpEMN-jBQ9lcAawDVXjE4Te8EHZLSdPaf6VZhzrDhcbiwkDvYw3deC28wsQwHfq2QDxPvc7a_jUKN2784b06QO1Td8f4VBiD9bzQ3mMFLz9TTgL3KTNyAluSsP9V351cZdJQ_6uQrUCwV-xSVEZlhWjWzunmngJjhQ7KRargMaIThs8sA6RTvGDPSO_jOv0L03xeAN6YnCnNlc65qsCa4Xvxz2TZcOnnTu4qgyAbYIg5sFA-CgNYb8rfPr5q0rIolrIJ5IjE6t9Jr1CnZW6yFGdB20fv6g53Ldq6lBmonjKYRR_0rIqwyorun0S3doql9S1bYpqZzNDR026Z467VDtQL54_geu88xs-6TDLZD8CVYJi5ND5U42wIDBq9kOMMcM_XZk68mH-634bTTPiy5evG8olpsIgsdnkL0fuxTaQcwkLSqeZj0vNKjKYdTTTjP_3eSvJ_gJK4toIM2vYdZfyKfnFWc0mpXZccye_noKj9emUNUll-FovR8Rtk2LUUSzMv3J9nwyO-Zyuy9j3mQyflYxNieXyqJQGsTZ52sClOcqmi7hx0GdVXOzqqu7sQliY_4ZgbTcro9fQFT40kyoBXhrw4wOU7OK4A9HZktA9UruVrvROdlniFbuDKD3yzuv4RF8jna5e7jRAknf7Bzt9MvJ08-KuW5bzWz2bigpkYG0t7msk72Rjnpa1opeMArLDleW2IOYSnk6gvJBbMcCffT0lnaXxs3CdC1"},"67e4a4b9":{"iv":"s2pyxRxgjxIR7GwW","ct":"EKvJlbn6wezS62Muu1YHcoGJgLf6h8LkTLdCiHkq8D_Qx7G4uOr_1PZfPHayxKEWzydi4_eL4kuUWOJcDuHMLb1u3JhcjqT7OwkhQpnGH_SzeCHAHW4HHtEK1YVmG7eEyRshnXMDIuVcBBcAnE3zo4rfQ6wB_OyQWmv9M1Px4l9P4TgpbmUVkgUyfm6p74ExZqU6CeY1TH9CxtqOMK9-1-TCv7YbdYQlQXdtmI7HKn0JSXAGEULQFhpSAvmsKREA71I40Kvm7JgdppgtPMqvG4EJKHh69vDRpAntMLMDMCYnTcYverhGxah-PqM3It0Yy9R_Yljo9RjxOu6MV_C5qA0aU9eq33WxtwXOl2dLHol2TH_vTYshJ3jFDNXXyPq05nMLV16m9zGYx_C3hDMNa09dSyjU7mOLdTwZzIDjDlsQ5H8NM9K0FIqXaP2m_WCcI8NENf3NgNp-KpJNmJC3VR9MNDBoTWroVKEmY-GlpmktulREFHVwJny7A0hhl7bdoh-sjU78GSD46gdx9XzbbTgF_xKs4Cr39LWiITp70mXI4eqNU_uDOT2NyJDcTi8EG2McvWKbODv-zyxU_fCESXbS3L3S83joh_MOHHPsx47fGC_xOjIT1y6yYcTJ-9K6KhfF3SQZGdOlyjx0-xaC81OLsnh9YmhScFdlWFhGeyhRCnhfjVUBGjloJhio0RXiAFwWsqssv3OIQyfl-bqeN4xaWnRRLZyrgK4y_tHcm6beU-tYcvI28r6Q0BuS_IoaQHIqL3-GLUJuaufb5tuJ_5lGKU6NA3md_QrWeNzjh_4H2wKOjygozqDb9dcJFcVGDVB7BL0cXXKCZBRd1sjUx-2rM4hwPyvAv-x7eeXggLBo9DdzUtWHDMG3T1pjf0cY9VY2xAORSBrZDXrDzr2rgsapbYQdmFhcL3JGlyprfzA3wRej_QJhj_k2UjL7X5LRExTg-qEeufWe9nVhr9kWtjg3FPa2LC_9wcw1YxgpOhfh-hwC76zD4bw55GWI16ged4h1QG-oAiDZAwegkkQeFg6-4igFDc-6BQHwWrrjRe7mgLSZJFuXW_l07-BuhaLfxQWkKLwlimNiNhjVgtOmI1FDZVxJNjNhkc5h7dQZbN2U6FPYs6CoCYPlqyCK6Lm7QblmC1bFbG78ZRJ_XYZFj7jS43CQtGXJhkkeX8olYI211HPaCnr8RhTPr5ftjmacaGBgQ6xbDtc7Oua0YizXSnkx4ffBCEPoYcvpA5PeXPiuwQJZsMlrKxFZmwrtG4pt-e4EUOwkI_X_E2VP3jPiYWoMd51DWxN8e78dL4GmBn-S0zuAsUgkwF7hDU9Y75Z5mNadJiLQkv_AcdeX-68gJFxjwqWLqv43UGm0mMLsMRCJDdQAyXgpJU886mDvhNQ"},"b059a07f":{"iv":"R80gHXA8ihM3ag-U","ct":"bazSwIj8dPQQg21l_UXl-OrXky4xNTeVnuI1p4EOqyjohtLJUzmcIKZLWh5ixQDK_ylcX-hWh_0dVYRWaknGElHFn445W4MZfAI5AfTnUlMVVfRin5ugFoZE5C8nU-0woTt1jTXJ0BO1ekW9uko9xOpexXPp7Pjce2F_tHR6Mm_HjSvFxJjNBlx9SD6C64a29t9_fRptSPOw8RtPiOiSYsHRoyi6Lmls0NfSHfT_voJ8HG3knKDQdFr3sWZUM-J3f0pqF--33iZ5T2VFlfSlWorUr_qU0j8rWqenTPdQb3iCtfLz90qi0W9_NMIaxRbgtuqSgxyKPkapwP4ZuLf5MuQC4u8KE_iAr2rVaD9NlElcGcDD5f67tLTjc6Jszxsr9cFAmQljXcMUcxPeDfvGVsTG6XywHkIv2TKd5A0a47thzOhjUJZBuLDgrAe0awsPxC4xrQvQuHef3KQ4N_8AsL3R8CeThfiPanzsm6rrW32Vqgdeo-X6GZkntC4psL3efTeOp7mXPx6NtMSfLzR-j61pkZ3o5cw8_RR7n_E1wFtEpX3APSwa8F5RL1lhmUL388Pi_24XOOjN8GP--33vnM1htiZmT9uscGGKs1IBuRQt1ZQLqcq9LSpNKbubAiPC7H_uF3kdrVbj8W79xb5pHj8V-s6NvwlS1fyKGOGYYtfbjflPnYxIBrKEPTohPu8vjIeX4KVQoyyZ6ngcoQAhKJ5UdCmfRzHpqzrcfnn8Jw9ishVsIY6hytQt-CzHhtoZ6toDvpKFYSlgQPdI2xRAXrTykAVjeMHdkLPARgPyZmb0LtTlbvzNEkhe-5PT6QX3g47oUQP0PdHvKjSTpirRLWlSFe4E2R_iY35GOuIz8sb3LfO9OfyyO7BHxjQfKWpwRJURy6fvxZfMVwN-98C-H7ulS_lR2gcbIVSxfkR-XR_EuSy6ZPugjo7rZLVsUgUVs2zHvcOGddLU8xQNmCKI1opQK82jnMr8qHYrlPJsvYHNLPTl63pziizOuxgvY_OQ9FthDgGD8uKw1pw0o9zyehlFUGdB59-ekIHAfISV5-vhruiRKOeLl74wKydJohptixuwcQIW2dlnviHV5zE9Bb6IzehRbrhYsikUy2C2CF1VIRjk96Eye5smCo-nHaYwcr2GqwrJrpK1c2W302JG2sq-egGnHBBAxKAIDPSZCChJwD5qBaYBNol-fwiXJngN66IFTWDVS1DaURhsuX1_YckSPCfeSc0sKyy1dixotfOODnr8u9A-_zEIRWZ92YpaWvLymda5o-gTMhUDMBIfZf4C2Tipqwtdtp-FAtpICHR93dQ5T0MKA9LVcSZ8zHUyOJBDdCyVSYPLvXYfbxFqk5qH9fPAnnvjOOKaDGp0MllbrLKxaN7RiiDZZstCkd437nlmnkNMUJqBQwCGx3uNVBiCj60x"},"0f1dcb45":{"iv":"PFvxH-JZW3DwBN6L","ct":"3HTpCj1NJhRRyR6hIwNV42z0VFuS2nzbQ3TDQgtQHUyKNgj2xBj1I3xQUXbAYk4tkIoXSrjhYdM2wYVjnCOCoBgCIsXsz-8F_uDgnPP1mXLHh9jv-CuvwAL-wQEELSdf_Af1NdyXV2vKG2G0H1TCxSl57SMCyoMAQyXNDEr6qIUpZ9LJmXruQk4a34VRHR-U5-MC4vsV4cpXGHAFmDGHQfmlKTvMsss7CkLg5yTQeLD72bVDe6bDaZMkbE_Ujx8mYBHoUPIwRj3Wc-9FnMUDZdBxOQCN1SLfc2FUsxBV5nCKwF0hvkxpch73PwUTSzb0zHf4yye-8qMvgX1Ci20wc7VXEYujG0QdJfgKhr-fb47xykzdqt9VM4Vo5P6ub98ioH6GoJlHj78Pqe_k1JAu0oo7SVZuIQPJcvmjA9ZaqzErORUzhB40ud3wY9IjI8qmib7OaaQC9MAG4Gz6X0OrsH9slUizmNHD1KIB0ZHhMw5AsgLIYy4qzyPQ1xvShO-EXueFa286f9W3eCBQ5tIOoyByhNclBc5rFumi9hF5gzp4Wd4hRdwNiv3HZ04yJSh1lCAMsrRzYhkbTN37gx-uQlfmFSWwud_r5chbDSSF4Ctcw4ddGN9MVrl2inoNo3KTzckdOY5QDxmEfGpRbSg_j8-kQCvvLAhqM5uaP1jtToQSziJAKN4i8A7MxC5Umck8xEYNmkR5znFAlg8T46E5ov06BsZ3rGAUVrf_F6CNcDsLMTYQI7huPO2YzOdG83Z6pAbZRG9U8qNXylzfjj-hi9THFgRJy54c4ySXsUx4JXLYCI9TNSWaV0NdDIS12ZB8f7Ex0eGKHpfDKaNqxUriNvxiwxdJRCY9OX1xUjihPNNtC8ZDZDRPRi2aNHwy-xEZHAmPauzl0Y-JS07G72ggd5zkzcFeBfrGle4CFeCUrKwuHCPQK4DVy0hfSmBGYRDlY7DFGfLFepZpZLKnU9chw-GGI09KLLfQWThD4nbW9-5ieW8nOI8jKH2Br6AZRIl5zDbW0WLjvKUlzmzQPJEtCUHZWXJs8GkdgfFKfR8vhiBVsEOBs_LqMk4paGaQOJkmsNmZekifet8uYEbhRsx4W9YVl82B-M3UcgMVeltgWAYCwC0jU5DUdXh8SWCo99Gt5wMALIwX37j0_eN3EkRYcES6zRGSp3es2jBHj7rSq7uEDso9q1qXQphgcJzO98q-rxE7lHGxpI8a0h8dFrKsrlNMyO9_L8MY5GmN73KMtutLRSDiz--ikWilHtu0kmOp3dHs3vns9F324ynXuIMoYUmSXuqJaUl_lr7JOMnH5Z8AAyDhGE0vtgU5RLE4hUizf7qNv1xRccrE0uQCTbrJpwmqUXiEStT22KRlm8M7SQvl2rEFNGvWKDK3MbCt"},"186c02d4":{"iv":"EWk70m2A1p9tNay-","ct":"b917AmyPemrtmg_1mkwgvZWTbHmsQZYfh3xP6WMrQiH09V3W9rqCutFQlhwQhPuOsCTHbd0UFAM635cC854AKmy-Y1aXnvySJVfdIehofEmQf67unYlIiv7Byaps7wLiOzaWo6CH6aEmouZAjWkVkIuWiEn6CTy4NA3LuP3bz9DkbQxmo_xjSfOaN1THOiD5hOhVFL8dBjmr2F67SJDvXWYHMwS7li57HBM8qrum0-L1xDwouCcab012rZ2MOJnUlGPzHWryldHZ9j1MevAqRbpQ_3kAFaaiRXJXtNhxUVJIswPAszIUjcN_Rl8Xv9D7ZiDdAt63eNMRLFrizjlQ5LqW82qsEOUkQa9GxJSuO549fUm9FHwpKrxtjbYKR_vLsn_0anKrZ-JWbppa-ayTwENnBFXJeCmNSreETNCsid_hNJiMjN0AiY85NMnbVLJIxPgqITCgbpi8T8bU5914otmEhlBH5xDapgz-5C7n4edqwPMM7vQXLLJkypmQ0wJl1lKDHDJlLx2af9nTvhdjSuru4GVTFfZkrZxo0P3-aE0X8eLLlOTonGBFGvqX5QSQtnGlBxZufMw81TJjCWvMeNaHLOejD5swCN9wkjTAs6BNpJjbmPs1e25MpHoQeIkXyz0SBsl665i-MwOYTYvtnQzRapDuBa8qgRLeFPMmHWxmRu5NlvJ1hoKPlU7IVe0M9Rwt6p5KhOVaw9Rf3mFeZXxYIviECwqSWh8UkBMkTdKdq5Db78y8_ScCGp1UsB2kOpqqN-EXqJtoVborKhdSxlG1uXmW4dP2CG8qkdJi4hHjDI3L5K-Z5lf4TFVATAOy1hG5kkmuOZrs5aIwhep0XSATzikTjOuHL9eq1UhPatV5JIMyBNoYeeq_Bh3SZXG1Hp3E8oxSceaYGh_jOgxFnrTrbz80DGtK1moTrSVIwNX9D1-eXaBERsQuUvQ51RQbVHO9Qw-erBFJlJcExFfE5aq7eeFRzFg36bIDots8oUVh4461BEW2Y8s-ncvxdz3fRPYJbvFKudGl3fW8dpbesXiqbbMwaDOxw8TLqi7y6vPFxSNOXavn8jR_w-26nstHDd8Q2G5KZy8Fqjlyflo74Ghx894RTySu7kP6fWyM9hTo1OSDtzH2SxC5eQ21mQ2S5DEtT8RdkwjoMEbgBKPPxAmnwp0PD6zq1r5JYQOViJ_Rv1d2a4R3AqsFRabWTM86MfBLt73pTfnfsM8HyU_IExoXFIx1drkWBjHJQo101wfBE6wgzW-HxXRKeQTKtIrwnKCkjYTfBXp9VUfm6st_IyMfO4lw6SFRFltmsXyCiG7fLWNLEtKEQuLRHjNrMkYYTXt9_xfaxGTqMOi7pYo9zylVDhPFg7h4wO-5-LnfFmtoIZ81vPgWs_LGZl_7LTia1B7SSCGdmQ"},"5633aa4f":{"iv":"5btWzaHfRPF3-HQZ","ct":"0E0JJpuI1stf4nF4rzycng3ja0k0SxK70Bl2wHJOywFKfSi307MjV3GmPv5jEW0a8H0SPyQPkf5AOY4adgjVzZvyrQbKbQuSMr5iGujytTRRYl91DahMEWHFH9UI57vC3Rz_l4yCaXUeI5VDk2Y1mt7j2TXTRxZDS5HtakZDVyzNXMAOac60wiFbBdWsRfKQYM8Dc5J9sVYyXYRl2vgjcp4gCqD4DrmDpNArl-QwCJTdHmwnuDV_YTOFgVX1_XuycO1t77QrljAusVzip2IKBiv13z0MT4KGSyzM_One83TAh4mVEtXJ_4Bil1A3Fs9lazWwV04knBay5mvkyHCazqpnQnoU1oQBVakJv8hVb6Lmqfgn6T2O4blk3BY1WdIV3HudeCKVo4U81x1hz3XIe6C5yLJDhVoXvpyHGeSilVYFOBlfS1pQanCRj389E_buEDqAfT_WdaFYx_rp6BTRaggvQOuvzabvRYn8x9QAk-5l8bzbP8lMXwMQLOQLh2kGSoj1JLI_mFE8f-DmyTez52PMYLcAOvVo6y2SrHoBTx3xfqqID5_B5m1Lz1pM40vnE2cVmjngpI3pHcP-6qmlFolax-zZEWwSHMNE42qaj6vjn9z6LExT1MG4XMvraPn4vd2djf3_2le2r_vIT3hweeu5PFKWfGrkNbCnVH8QkQJtCTn5kmgYS44sFi6EtjMdQ8tlNRHtb1zlfostLKYHUMK-z7ieVZ98zPebFHtyRp74b7eQHQAbE8n1CmDTbpdLo9e0WL_AhkuO1LTCiXeOu96QLkvF1pTBfYpxPicG9F-jNuBskTPS3IancFGe22XTk3FhXxBgxfN_r4Tpuz-mrKLGNxmIbSWrkLIYWkbSEZr6FavYkYb_4z3NUQj3tvmML7V7UhQaZDWrOWIeNNZfnqHM_qQPiadxgXq-d5EGNHLHWzEb3_C7I_2adP9tUAGSWaBOnlqly7U1sCkDgOromQim93DNSe0oHyZDA33W2cU0MZz5XvrGBH8qCQaGYOLJw5f_VHWGMX5zZ2KFSwSmhaQ6tGuawGzCnoci08kRDFZmmrBbCps83sAP-WtIkdE6qGxz37j9Cz6nSC9GlNo-UUnPVh9_E37Pv2SFHVO9kdwwwauZZAmnLZkDcLg868tHX6MfAiFvNXJDXsXcI3hlcYI_ANVe59Q_qlRxdJ3-CKFWg8FYxhOd38k8B80lv3ixW31MfjnyemzYzlvBNyv5XRlwSYOiV2wuXuiU4asEn4H2T5brEjo3EDo1zVI12SSaE9hZcS4jNjLz_gV6Gz11WZYu16qvotVeDPfYNpnvm1GNile1rjeRnJ6cOAspPSEHvdO-fuTYZKliTfPaua3UJ-Qvr8BLe3tcaVyb69Uihg"},"81f3a3b5":{"iv":"ZkuQLHMVy-iN23wP","ct":"FuD0UjUI-mQ4-z1XT_evHorL07imEOtNd73K5vlTY0h4DOgv90NZsr0n4n-azpv6-_wCW7h46NFwB__yNrcOs4ylzUiWThW90mHQF0sCpE029ouj7rJ_YennwzNhCevMcZYsFxJJb5EcA8_tmuv5uk0IhnsJc166UQjnKNJkd1K_-d5GzE4uHWsDPM71QsATJKHIyOXbRqx3u53i8BKFazH_Cqdpj0-kQVS7Lq3JwGWAM4ckjcd1bp3DgRIkeWpLY0qv7iD3zsrwT_LCQBVSz3UtW4HodqWUnSvoY6SzvfgXSPvrJX-ju6tA032GzjGOXcL5mL0UDVqfv6W2uP3PXtS-RTZa0HagKjnR-UIzeBQrscpNJ6bzTzG1L3CMjPcLrZFJNBBpHHTxD0OB2AbSdquEbPrqYUzZW4VmVnT6aKDkABtKGO08o6RltqynhOD1FKvmlDqXW-yeceqLWe0L6yDEFdUfm5_MQVi5-JEBuKX3aAlS6_UAfBYQTz_O2J8BwPOSBT9DyKx6TwgDOt9yMeqMKagNGFCwgKjHSokAt9zAYjSvOLZ3HQVxa9s0s5EXKDOEc-bf_TUTJRe9UfZKvQZzN92AsP7IvsBcsbgpJan7MNt_rrPNh3W5ZeN-5ivv2hj7c9dC6RKNV3lsAFXMthjToDdGz29BY5iUQOOe722Eo-ZSJm7Kz23dNyNWmiTHIftUowlr8l2PMSW5uvBKKCdS9a9ubX8_M86reXFi_8RvUzKWSAlcsVbOpYwRuf71J9uRk7sy5AwP258R9xoStcKdl0uyBwvhvC6DeWct7-zj8jmoZBOiaNiFG4m4p56U6E0lbdYcxzqxoeW3R4CVizVytkDfAWPH0WXN0pJ7y-ytEj1abnzScJ70tVdoUsbrDdV9qCvXeGanMTtnwyi442ZBo3zf8HrxvuNeg6XpGE8ev_U07E6G2XDnfS0FtW2-Zs1lvPYgjPQ7Bw2t_vZ5-DXZ6WoFyAFELmxKg_tgoqn7z07vT5BHFUQZMWOA4EUhWLKOjG3VYa6gME5PoYiAUC8h3ZmWUMmwuFr2OwFI9EGG974_eNL5it8JOM4VK4N5QUmgga7t6Wgo0QV9X6WmeVZDdawBXTCGWim_BOrOh2vW6jw8QZSrfray43euo3lpLjafEdePVWmXmvS0gTSDybegiHIiVmkjtegNGFcSrwwjy2RlweKUCioACXwCKW_fC-Vc5mSxkpSfNVYd7Yh6NnNmBtS5ljF-LSioahnr5cH5KxFGWWZEcWwI4Ve1BmdXGtT_cocBsM8rv-GIvcvRcMQtuvntd6tvRLmxvEFHVFWiZMmHVY0oB1v_VZnOhrJs01-sngE0iM6NAi2EZspXTAh-xr-pqU1bRkLcxKZgxyN7"},"fc9057c0":{"iv":"KyChNyaqXyC1lvY0","ct":"jdkdDm6NmSHTWDis67FkEjazhYRNMfbAeibuAeou3ntgKTEiwbuIlcJ5puH8SlCa_4ftZCxYfuJLIckvfe9_mXt3VZZe4wJc1TsOhWpiXq20IrSXMK5qssg7K1_dystuR6oO83sB3cEiJgRkscKl37PUp_3Mlgq0kjD9yug5JIXd0zjfGlggDUXPMCCI7QTMCEReezFNRRt4gTLajRUe5p-zRP1p-nOiozp_cD3LHI77vlHgmiTN0m0VgSvKiuYEZZouUBzS7GfmdKAHtebtP7JCrVuUA2rajLvG8JThiN5Rhx_uRPlIyD7PjtP9QH3p4d73coON3Ukqdv_7GaDVT-UKdqKP19AgQx4o5iRCQwnCInGv6u_wnzHl6AFBukmBi77QVVaCAvE2FvsISvxBfaOXtvQKyyPK-gY_8QxllPQMaXjOIh9FDEnBS36y0yrVOXFjCV8YzJiJ3iMUKiEEibfEV9wVt363XM9hHcbOP3HiAUf9LELoA8RS3N6rlFI_aPtW5Z1z8edKzvUq8dXbP8dBjnlUmoF_gFDBHKP5qHjwfx69jA8ad_Oacjz5YJg74UExxU2DiS-6sG5LV3Sd8jg7GRHMAYQ2unfMxDeZb0xrGG3RAx7gHHiITgc-lIpmLhceMcEOMDOdzyrw7TivgkJyDfiTynXojMZ1a2xy6cXyWjAb6WMjT8kRlw_9b1ocFvsoFZWy4xmPALHejgxwvjcumXaPMpj6PSSQJzTd8ttUXkUY8OURkPwN3LJABNs4RZfuwtjN2UFOUZuNIonWCEoBioTSZVHN6WYEdlFOZtr8bJCfod8ssndI4LTJBOnJvyxhrkJdSgBKxzIpSYFm7e86KE5G3CDQlvChIDAcRFrAkwUDfViSx4a08av-zdESV0UUlTLojzxNDz4axKvqswQzzv66xIXWNrOlPmVsl6tqWyfoSVOb7_1XKSmgyvX_3UQNd8hc7r65pN7YEggmgZ8JUtFeqXG4FvTWDbt6vdVttWeGPlrrrChJFJSvlOTxT6zTATo9H5N-5ooICq4fii_b8QbVwr1IeTNALJdAkqvHR4Mxn5ayxKO0jhftF0MpYCTCiNhd34h9_r1YCQX2rPMixueUil_tRi1RUBG_NiffIVSVgSDJ5mxG7t4uHsUYBRSNKySnCTa9xv9Fde0pmZowGX5DOQmQAXm2wH8RbJ3So0pe_oxS2oUMP1iix42fOwv7WRUm5oBLjL1nLqB2zi5yiwDTOTF5v1rUMrpec6SFzBWWujegwEba_m-CQQtoIpY4k0RPzKyaHTQ6PPCuuSx2d_4qjgXXN8oYwmz-2l5O76Z7Ir7ABouhRsK35V9HHFqpJkuxSPvba-kwYC8C4VBxQ2-jPHdOD0ILfntUDABIB6xkJUI8K-22X6aMbag04xFNkVoltQ"},"a9810688":{"iv":"YUoxeSrEZGi9vxLM","ct":"YfftOdDGTFv4nhSDIBOoANpg6HH5mjN4s4_7ryu10FEjg1pm0urG-WrVI-ucn8PlJ3NqlxASfe3qyTaxgNBrNT5onlrPo0wFmwRKWEQDP1eESovpUkLLBBoTFiEYH1Zi38sRJNalC2P_GxNUM5t17ImsUPqOfBkXbSUO8c6W8z35s4v711TZp-8FuBHVDSMln-aHQWRiLqDlo79LoAyhqH4iXDhTqJ701y_PyMevNkI7E3cyZoZquv0w_6HEkI9JFaaaSUoTimPdVY1_kvWeN97kbvZuT2JgHYyIjHyoh5hhCl8ix0ctZ-58eaYSOhZZfCJuGgMuf9NhkLkRxoARv5j-MUHtj_k9r0Vd2l3ej0QUjuWzjvnpFHcfvdNJ_xgFuPbfg6idQa77Bn-5vmW4fK6FG17T1-2ER66C8iMiR5tsdKveRkqIgM2G7cDb2wOA9KauJBYN0ZbSgqYD6f-lOXVQa-yBdoaPMXKbPY2V2oshDEJJL2qn0_KFXrxKjxH5X7E2UNJkac9cT54BzgXvpdQYgwN50-OHXISZQ9XnPiN8wB_tHepVeXTfZdtw1OAO40XQYBGBYW4II4vypVv6PRZhZi-FLl-F9l2bA6TJxCQuv6QeSYZCaJLB0LmRZ6CPxHiiz6nl8jh_hbru7lXQSnmZjTjiowgYphcRnqpC8WpAGNPZ_hWMjhUYQ4hwVwtcrLCnL_BiY48h-rxVoRwYYx9-sr6yID0sRhcLHonMPS8Kwf5xI3CbYgv8XWEazh_TqbtHamUEo0RYWqgsi9FDmaYFwoIUGoNXXY6_XZBO_DGf_vnvOu-X6Grm6GWlJZnccdw1uzApyCxPpfwpgkKCkuBH1O_SWUB8uYooYNk37eMojxizHa9ZaWtAfgbjJz6BlY1ON-r--c0BlBXZb-CyeyqhVfYKoNaUFuG678EqQ_LqQkHn3e3afaezIn9GEAwzfd3DfNt5-XIAupOJk0nFlUvunNuLbmoEoJduRWriRVbgPDWX5X4WLdbcRg3DG5z-f8A-pYQQHA4HpP_tZkepVBdhD8QmBmNaqvCAUQNx2AWcgjJ_Wo1OFyDqLerAZZSgvYhX_4jJOyzKTQ1czxjeqTZQaAE-grkXMJPzkAd9m6VauDvqMdNB9JOfRqGQu49sp2iPlGMKwI5DFEloKMgWHWnYJcXSLbrtUK5nGv1852VjsdUNxdQCUtu-IjYDzZijGzySAMmITNTrDNo4p81PNC_C76uQm_DjrBG14LvqB_11pwpQGQA-lg2TlTA2xWNdFavBc7edprYjii7tJNoluV8KNZRuz0QRYmTY32VAwuqpImJ7wjH4IPtaZ2iJzeFgmtfd6HvcN3QwQH7DaOG-RSjF2Da_4OkWkLoNG0W4ew"},"c180c6fc":{"iv":"DkS-9L-yA9zN8d6W","ct":"ODTacXtpZhNdWpxR1HnG9d2Z4drct_2NDDMzoAUFn0TkOIPOyPS1QyPVsPAYUtT4EF4Dd6Q53_2p12fBa5I2hIubSYCeSNJnW6QWavHVzSPk7K1H1F-ERoBUxzSxXo79gqt8WLEA7DkUVOacNeFoMmMbDXg9WwcJZrj6DRNtto8AlQZZdMdIRmVyN7ks0vKwmktVTDSDX7BkhhYXSMT1jZ4vMWv1v7yFCjOkJdGTr0vpnQsLyeH5_g1uLvEGJMcWrrzmRYp7vn4IJzR0J9ytYK_1BsU5KEqBFLd0irdLPCLNjfhKhiQ340hyatcIAlcAiwxNZOJb4zYQTPS5Cxk0hGc3Kf3LVrrDswUEDy92eOjnSU4iX_DC8dcRe6DQb3_tFkjIr2QfBMJE5rATX9uCW1qm9CzmYl89uYA57MfYsnJlpMGFKvnkF8n25HyJLcbgSfdRCibtLmT_D9Slbu9kzD6N86lOiIelV3e23DRPudhULEGK-hkRAkML4lAOSMhs9ZtXq438JBaNb7cUnWrVH110gNs_R_JHY15MjfhkrT6oX4NzF4HVNep2hrN_X4PPMv2stHRGNqdc7jyKey9YcZmWt1lznUimLztuwwO2htzwIuL7aSPTyyCVrl65lotNsQL76iL1qVL_bvum0Lxxbz4UTKzCKbhUnC5_-LZZW1omU6UkO9Z1UAZs9bJb8jQmijCQYfck7-84W8cgsacAI1EQU-IMnXfuYpoTWd1xRM4weGvXrLK72-dO2beUcpmnkPqc_xSO_WWCAhtI7K_QgVGHFG7ma1H-XAMXZUh6DFN5Tb7ochjcNR6W7PxSN1DmD-Ul4-jS5jmJouKF5gMn3aZJofAhXKgCvRY7WBzbNR4RInB6bHlxmLST3ukOxzQ_CTigRontGQitl0l7XI5qweYxiI8omimWkW0d_h99KjFUXN0N5pruJ_EY-RkEHMp1aZKNCEkKjRzfCHlWRTuXoHM8F41wK_zN9w9pseChh-FhIbCiBGN-cyBXHTmToVmZIEPtU5JrClJ8CNcARaXzWKUY8YUJCk_y_2SWRnhe-JfW4Z0lLezTj6EdeFZzqxAQJnMHjYEXTOlLULkZ-xsnvANeMj0rKcgY6Zsg5SlsyS8C-HiHEVDUh366wL-p9IAyhBmJbGJa4ebMKMzFalt8-LdQAArAXJ-e3pMbwL1tuwuXKxIR6He_zzlpuI_7G45s0I1rZvgPtr3QO7dln_J8Dc34kPq1uSOVgIbC6O5N9SS8mbjYmTPDlDArptRuzqmW0w0Iy5xwaszJ55sJ86f0RteVdTdzPBPD4BiM2KHg9YQ8epY63ZKhXeKqaDKRoOFjAcLF1mu4j8fuyEn9jZVD5YGeep5xZIliEQu0jVp-o1vzEAVAkK_vZKf-ZGiaqIuWyRh760iDrobOYF-5xg"},"bfcb3fff":{"iv":"aOCVOVNkY-PzErS5","ct":"elEjVDRzodWITpzcpqgFi3m9uoDRcoGD6n98HkvlEjQjir35RhLiVVa4nlRrJag3WPywxU3H7sKiL64TI6ZGPGbXXYY3Xf3b7ZqXP9JC5a7NUPDKlvMeOa6orQ9tORYJeJeoT5lqlASVSM5RVxfBZsC13h7diaszpvcV6JwWXMDRKid3G7WVZOTwoioqrQnbkS2td3P4W8Swhpxc7k7Ewerf6_cP1yq66ggkYH3JpeAOvmlFQdwnRuklB1oHmptD5t0da4HbVcWpiBJP8mSxLOGz6Ig6_BwozP4f9eY9fxKYuZBj8EEuMHUL-4uOwwFtcw0QjlcHeS5abaZiFdfL7MABgXVTGw0amoDsnbL17VOMA2q5cI65K1sVXM5Xkk7Vsg7nwujGbwwqz6U6-bOxqZr-k85w9EPom1aU8d3Q8MoGsqF8eCG3mpwnOgJF-CMpJyOZQwv7werpaJkWdj63QHmJwCBPyyCCUq4fbrz0lY08Ip8byXFlpsybs7Xji3jbOs4z9_Oermj4ilNtZzhuZiKfJfXsPX9o4t1nOlK1yxeibsi_uNjXB4FsKn9qEYdJmyXVveam2OGs-wAvho8JOYkCnS_7JdFgrBBkNJ7ILcWIhpGy-te5BlGJoV7SuIcPLG1Y0__YRjA1X3GPNHa7oANECd5quXBGvq9RhkLrqiwr-A2ASrS--COHOrnjObkCaHkshQOGpfamISIYIT4mbxP-z_d1PmMqOfHeBWGlZRbLlxr7mvQBDFifyB1rtUB3s6u1LuAqWbGvTFlLPULnusoP_v-BBx-8S2I07RyOGmADQz5wIDd_tQNCCJpsFjXVVI8s6wimRDoQu40qTPaTv4xDUcXz7woBUDwmVD32z9qlfA2EGMBO9LayY2ysW-LiTVEMR4AEjJ8p5FW85LWtYhYnnSFJLwU0ojNMLI6F-gUzAyTNydMMpaWwM7uxbuqguK2y737-xlLFK5ElACf6Ryemjrm1P1gDVus-GzuFkrDrgxSbwqcty0KcpEbs2zjvNYSsgv99T64IOKf6_z1sqYsdRZ82mhol5u1Z_LKvXQoweI9XmqNPZ7DCO8r-LK7xS461tkXpDLwpSFGoJ9lRuXPa0P_NLagleZ-UlEPqKdKIHTdVvsLYpQWjPDS02i47XgRmPo4LYo0iQ1vN4rcvpVswH6kvPCH9jQfVWkRY9_LANno0SerUd3yRcaqtlQ5fn6x0nMOd1cjrDfznHpl1SMklFtN04yg3uM4xdR7fgPPBsrcZpPXwyYDkejuBFLaIMvEwo7GhnaiRH9VD9oluioL0As0TyJyzul-sM5GCRVlg-vVMd9ePyo7nh1ytIUBZFYPC0uQFG_tavPcWR3Ko3b_6vE1kSxxjQCVKHjJjwjkxMPtr1wePfFwZLZ-zYmX0_j5D61oY3qURVhWlB1Al-M892u6LRgvjePhjAVSXLKXXFTk"},"c846023a":{"iv":"unoTpMVsv2Al5q7n","ct":"HOIi73I0m9Xu22GeC4w-2HS1DxXxpNfU7sLwsNhCRut8t1eBoDQrmtEDJzGeRHK0WdGPmhneX4v0pt7CaOZDFDqUsldQ5I2nr26y9Ca9xUg5ptTAVTfMrsugMELaJhUhftxGnzgiiQc1v7hI--jGMclthLIIRaxdIAYkeHut2o7dTUREoOJydoJF7le-j9P4PoA9ZbeKSgO5vqFE2eGUk49Uq3ZFgcbdTSplBoHuJxBTK6uwmSBRPqpj_guq7EQJfw9JIc8du60JCs6LJ51m0s4T3u3pSdpr1_M5gv81Oz3l_qDwmePSNA6-LH38pwGPwytzzuGUqdzClLkTRF8uIMI8xXCRrXvD_iNnnzeo-0p0ItZjPxloiZF2tJjmDdM8G1Upd0F9WAU-keXT-OnXypmRjNk67Rd06yCQJAHDFSBdzogFom3XYvt8E9R433uOKJAiL_R2W-9x8oUox1RevHn2rRyvoHQ1VHSCDHKTLZd6SzGN5Ug4ws9ABt83Qi5wPxyxFXsash1-xOaYwtouxsg7JK6wcpwnnrdhO-4xQ57o7FuyCS86OIVUQnKUm3dxeux7Y4AHW5QkL94zMJjEKwzfNU6WKJj9YMqgC9MExqBOWlXF2ZESU1h34b-IEMGdQYMXZbR-wRidwNXoo_7sUw7R07WnLP1lWHMdujvKLuu2ShBs3DG50566QuapXJAflnRHf6CEyKkwhj5EUb98zEMTcFdiDNlHLh3OcTsnuPjwjO9tiaZhdNYric4aHJxYSiDFeVH64Y7IWGGaugymykpH-qOKkGw-D0zyXYKUVG3QijlMhw_hbHszrLqpc2zEXm-j-HPpNwytVUHuSB4R5tKM8zETjEOvjoAT1C7LfpIlK0j8PeJ-g2v0cm3nJMQPnwM7qi4_P91ELXdX3ogpV-kgWvnc6JK6a4RYGW8BVreekrRFCo2W38CIe3nu-KB-6smDu5yw8lEMkINqSQcUY82zlnN3rCuK2CJvzgPpVPXehmUHWnro-k2iRfwufd2BcZ6H56ftlwks5E1QnTP5cad7nTBqnRm4-krXSxPWXh6h58bh_qr9in7BjsmKkICfiuh9RHcpgCIEdPhfXyYb6zZtcTl-Za-MbIgdnSPQfCR4Ji0BCsb-V_hORk-ZIaGp7N7KNdAIf8W7-0lY5Rxcx4QqKcpktYTHTwT5SH2kz8fIXFVNrvvbkbsvGkX3tuTgnW_5nHGSpClHxrfh_1OsAd4BbBs8ZyOxOCITfeI18CCrJ1s6eiXcT9BTPCRls3ASgghH_RUG_ZZ0xomJRBwp3BYjflfn4h-4_UrMkgVSDOqr9WuUzzr4L8u6nqh7MCg94mmIJxrQq9SpynGdCbPmEM4gVigi78lnmyXYmcuVD-vpiiEyvKkikjc8QnjaAqejm7QhckDYZGBx2YY"},"44b23b94":{"iv":"bdJqg9ImcI0pxXYd","ct":"2XNaJ773prbBwDYWhcgn9qLW1csx98R5Dg2ps8ck-cKbTxkRnnowznBbfrA8s8aRMUnzdxjNIitnFD07cWnIaO6uGl7d41w4MfYaB2GpAJDldpwDUsQMSErZwLJaQ46ijPFflN9ntLO8w5u7u9xuUboDAoa8D_zXGLeca1lIv-a573wZ9Q27gg96aX46EAPt7g0zDTDzm2tafQAjzOhDOujV_1olNWuA3vdAzLkayZJnSpkzoI0T2_DoVv3pxPsu8hukTBMUUmFOq7LhGpn9mHt7Z0UcZmoixeprJBKECtvUpS3_xssOplDAu77obCynjsoUqBr9K4qqMloqk_3f0LWQlWTCRcxLYZti_n7bfhONX55kyThZRQty05YcMAq9fIVgCq_TgBCk_OwV8LR8rtcH08AnmLAQIrupijMYFWY47BHys7RAqv-v0rO0jOKK1JWw6iIKCp_CJDbVEP59Z68PfrAg-vWBOvJX0x5IP0EpBdYtUtoMPNx1sHdqkZpv-KRVGIn7ixMthgIq5FQ4Ks0XQRxEoqyH8uV-Vy2srFdzHDFXP14qUnpvL8ar1mGSRzKmscP_AeSXAQSI67MOzq_029zgy60U6cP-yrMgn9sxDomjGwddWpX5lPBkr_xHS1vpfPlLfZQpBrm8lEE3iCBoTjax3-tCLuiQe02PkYOcMz1ieTTHM3RCcSvMEOCnQvSeL5eOYCs54cbAvyHgO7tiFLeUkYBh72Txm5uco0a1P8omY9q8n3hl2kfpZLJ_imhZVRUoWMqWethhphkKf4a4kB_MIEVJAkBl0B2rWSwqgrIiWCQXlFUJ-lQSf0QkIR1EKjp30gOfJ97SjH-Z-7I3QDFm3fXljFQ_ZHX7lTgYOXzhAAn3Jtheqg7n5IeyltaAGeD5AQeIRlEbADgs84JXquS5v9Uz8EvRFkElnD9IkLbZ3M37a73oC2wdq1A3A9WavhSMC12GegVxKgEgEstvIIlfq--wqofXVJXiHOFLq4DTVKIpuN9dFcHJBteRbp9TJ5LL89n2-mF9kmwDk5w-fnH33vuIQyWPGW-WF9RbnKVPe00oGP2y5BeP1CJeKLJlFO_Uzn7VyTFuuxOO7YxNhLPY6FVpfBtProPCI0j-mbX9D8Lr1TRJlZG3uTzVYKcVKs7l2hspvTAsT3b_3GM7i4doAJDR9_8x59C6V9r-LR7UiBIFm_YkXoQwoNRTIRuNn0Bzfd3S3xw8z0JAlyQpxNIZ_UTOaug9PsSmX6gA-a6lxIqZ2qQYVqJMvLiVzwfiNyV1Qjg-iX5WIvXWG57PFQBrAXfLNigxxFVbFGjLcH4hORYTGL_QciS1kuknZtSeK9pr6J-Rasj8WwuFqrJRgggRbWesXxspR2XE5ICFYTKNIRO3aXR9J24-Jw7VtksIhCT7RasNQuE2QQ"},"8add0c1e":{"iv":"SLlqChZ-PIusxV4j","ct":"s1GAhx0XcKlhYIzGPpT4lq7tbGhORStbYrbIQm0N6RsHil7qEkN8kogVELse2oDGGyxDfevCMhdkxedxsq_Y21wMR2f-eGUnakSJ3vKv8kQTtiq5jmg1-F4AmEU5v8H6dayndz-Y9QgzJWHWf_7JpguwUsei__M34F5wLAyNFBhHO3kPRFRNNgII3PUgc5iZfgdxZ3tyBIGny5glQ0LH0j36CLvoD_XN_C18QjxzvdT4dUUc_agvh8dRBuIw5ALk5H4-HxZwUzvg96pLanR4W-qzJOL-SKal16xT930-U9OIPL3ovwcRbbkIpKhNG2i1Af9lAHmai0pGZMAI_r62Q2wBl_6gBljQaB_V2Ho6k8rp5Jk09XwSUS535EpYqtLPKzaa8RTDRN2F5QgAV0qJxeDZqMyQBEUcjltJ83V8M7SDiuG0AnWpWehUW6DXxFFRBIfPbd68igIoZ4hXVTwtSMfls5Nfv66l-VnFcjAXAhWgyoOVmFIy9dvWrYZJueUZeHDLZFXtFw0VGG9ztDPPEgChZKcVvvaImLcTyngAxodHupZIABFboVbCxKoWcdU5r1l7Gvs25O96XctwmoLBlthGPQqShuQO2CK0oOj9T5lC_gVDBGYTnQP9qT9F2yKFXko0iF9wFYJbcMFUBxckNxxKg_y-NciCe4KG5BaCt7f00ozfWvHOBb-B3q10Xn5RWIOlPGinvh80eikakXN08Tk0fsZPwYZivTPf4Hiqcn_qr_qqRcXBaK7V2VgIaBgpzxhRfvW3o8NEvwcPI815YyFnRL_LuvJskfGapwTsVHiTrb2iL1yC12k_mzSxQUv968moo55X-10qHu2mQiLwRPH29h4M0_DuRNawdhcMmLv7_1Z-oSstE5thWuPoVFPfdgfk08Gt0uM7MBFhdL43o8X5tAFCTwH_Vj8GJydlw1EPJFoFeTmeCIpJ_SNYYzKl4xtMN3m3fpvRO6CK-VcgFd5FO2Szk59MHtV--3K5n4CUcU_G2Hz1soRH9RVABpbhpc4i4feAL5WYdzL5mOzBNcKZVDbrrl0JKKMZb5XPMXF3QNoQBcDexmQAeSw502D39OqBN7XaAWLPp-rrU26nY0lwO-5yMgrF_ql3_lbGesvGHVsJDtMU0B0q2EPAZZ3TaDJZpZ4MzTEJkpvPl8ZxaN_aPQ92MdkhnGVoIKLNawhjIskjZSYdzKO41Y7yYXHZuAnNe4acH_Q4NIuyuN06c7YCMw8K06h9UvVJFz-RArsIttyb1LiQP1lMl8vB4lt7yuBr24h-RDRa4ETOF0uEpJ_aX1WmU6DroBJrf477LHYGi8quT2ukPV2j_uvzK1uHPYFbmpHQ9YdmANsIujRfTesWzMAagnl1Ch-eyCrDdV3MDZQ5N5suhZl5FK-jujF_xesmyIPWhgl1oNLctyQjcfMyLQiK3bMe7FiajgiLl-l8C94"},"7023b21d":{"iv":"FFgknubwLlMwexj2","ct":"xhGlHgm4gSuSXzUDSzWGj2VFxLohJCy3gHvv9bE_k2WJsWe-tD3cemc-D7qRRgjTV6bcqAaF1CKhX4faayLRtz9Ci17hXAr8SpxoM7tvpMZKrp4x3S2zkJTf4DsBfkFmYQIYeLERcAt4jb570ZTrEHYmvNboyDa4x5HOcvZUSxRaK6f-mtOz5ABwu5v80vbHYRTBkzq9JdU6tebDqpRVar6g2RQntX49uQ-sBVNcluSJoOhkPYSWMNmie97H0dPiSo0znSNfanQ3qPI7uveQjHgSe1PnQ41u7HaFC2tlJOtLew8AeKQJ5O413qOlL8zyjnsYlXKunRAUutPcF5_J7vDqTWiEkH5qlD5WRT9e3UhjN8K17qtK6oo7A9TloCmGSj5slPrgF_4eieHjWoXdg085Oy0vikNc67ZBcxZ08TyOV99UMAGAsH1MtgcxL8-P23_-9Fe8jtmsB-E6CCpYKfF8kywjHcBC4qGZhMeqQ_6-FqKn1JtaZL0BhymKtzrHy1qHOrmQLkyN25Y2QyvNyoP4a8s5DuvCifCsW_1GAb4R7SB22w_V2_Mi8Q11bGkJUI-np-3OM4A-n5_OLeql_k1kiLkAv2mdqsw54JDjyChlx-CCNeGY--OkZ6kMSYiD55c3-6MHPKCT2K7qd9ESv5F3k6n7RUK5Vus-p6yBGh1QqOm1dbT2bUOhc4s9JwuUIuuFm7T-ApOw5Xlvm8y1Pc3N8G7I-fMkg91JhdoWgdUTwJNarC7ELJllzV3B5gOVALWNZDVK9eMBTW4Tn5s_DpUGQJN__rXl-jMALjoDF9Bhn2Fs0IKXV7wZIZlGj1nMiINAv3HMuMIAkd-iC5LaPtNsyFrlsmLkT4zrMjSHaH8Meuz1fTpBOXgQmJS5558HCkypcvR4Fxu8Gq3UILEUvFrQACxOBnzvTAV5v5zbWQ0bSzCQuQtpdsQL9FIaZhO7txWp6KPn2pr4rKievc9dsuks2LA4Q1qhoUFaEp6Ewd5B8VCeosPUUPYUBAWnvxjRgbEtW6RT8aDV0OpFMdlZ7wuDSW9lqMcwUAVMZXEzQHtXDBGQTo5-Vj-2tgoHNnwNVOLt6j957lQ_LuYyPkoqrH-GrLNAMvIrqeMfHnSBx48mnfnlj7kOlrbtBalqxi3qNGbvNLimcw4JdpRmylXL5CFa1nKy1aqE7A-g-4G1ue6M6Rd5QnshTTjtQU0dRizGHBwI6aDLNimb4_65fOZNkAVfcPLjNj-hm1vOex0AUlHpOxxX-JOUthYfRq4QfPuOOxdT9T4H8aSGltJQ-OAlVhUS2DPsGxShi7TT7ZuYKjFUq9u3f5RM-iKCvEi8sPZ3Nk_Z90OI2gb3d4E3lTh9TEj7hT2giUqMpzZMI4rbcz2i6v3_1z1xdOwicKxV"},"2c2f1d40":{"iv":"Hw5K6KP0u6GbeCNm","ct":"k03QoVByNqfgNjcMCNhvxxhkKJULxQR5uj1lASn3XD4RQhddaOaCFJuOah_eCtieHi_b6Y1ZDXXFj1a1mvRtrthLbGl9MUubU3IZ8luSMHWmLt5Kc3T_t0pCAoMwRdQaMpd2VZRwrfBKOTj67sG4aDYEUMw3_zGpelQsj2MAHLTTuUpkfhl9qHSBmleTF6neD8lki0AE2wbzQVSLCOZtdDQzso0VqfV5TIesolH5k2NxNT73Jp-xbPpV54LxWyAZNzHdPeB84pnjCyfmIPtyp2beHTbaKljevIgddYBLyqpj3SyQvxQbXj8FgZKVDL8rklpXkXBiAj1AYSqB3hDgvBYuIJLylbIke0TZo1XAmdrNH0sMUD_j26mecYi5uYTC-wkF2cYgrENWT-qG5uv4qhepDYwo-79QT0BQkwmiIurDJUimXMrurEJOm7gM0pAMP7mV39kpH2ZiFuZ2QavbViT5V4lhFKagIvBjXsOF5xJ7P4RNyGcJHPkVVu35rFOJLlOyvigJgFXlb4Xn1KJTLBrzTUw6phsFP47qAcwnqpi7wQYsJTu_HvOqX5abXirUKyOEyUNDKs-tNxxXKHIeNwGKdKMP-b896RCpuGdsJDXvEvL8rjsDuERmG5ZKq-QIU3TNm20hEGAX2vTHW5x7WJK9xeYvnyaGdTkegyTacoSooPsiUn1tmQ9GNxOKoCR7N52GnzyLKyAGEbU4sEybZCdwispD1DdYJ14PCVmqdC5Dt8AJdi9KCfhR8l8u0hBsi_iTCP7FJk1tPykZ908u2LwIXO_4zlDoAI3byv9mnX8eTN3V5kf-ABYOCg3hxDzBhZmGuoMs6yJTx01sfcatS84quqeVZsbI0Mm2HNG1y8mRF2kjIm7v-rLOlGHCanaQgXamTYFOfyHdMWIMbvePewIPcEwUsSUWplibj8MGRZTO8qC1toGdmHUSncFQXx1BK14koflCMvmYS-Zi2SZnE7T4d765UyI1VGUTpJU73lZni_7L-p1tx3X7oUSGF7L3D5Oq8wyRHqmP-yKmV3b-WNbve8Ym_C5XlnzL7ZBJLMEB-eCpX_wFk2P00UQ5JnfiMyZF0FkzUX0Wc8qWK-CbmFlOzLtyjITmoom8gqY6dZn1fyAvMVUgXUb2Vp1iqZe2tSZvstx6HFJojJoqMC8MqzN94hLdCd1sClParGKkcZWxzLuD8K4NqugatcWAhZRZazmvrdEIfIyOF0wwGLdUXz4wHRCCYUhf8APHhxbd0Nj7Ok0pKkH4KY-XJPE2MmQZ6bD36LP_rEwxd_W2V8Id4v5ws8WWprsD_gyKXgCmAFhLSkCwWjVjPf_tx2s6hf0Ezu1DfScMgSpzqSKVzL5zRnGHUS89Kq3NIKwYam37NELfJuIWb9T4x0HrwciwXaM"},"451e7788":{"iv":"apzEwD6XMejpsQwH","ct":"vPOWmYK4jjNmHG9Bcvu22txX8P5-FIherg4d_7AJ7Yg1Yryx-DP6pTZaw6-wZIteQkHDFDNlLmR8sBozkgjWkgBLeMOPn_3Pg9qTCJO66c_hdtYkyom_vC75hJUkRh0GIiPfqBqyClMWHp1YFauTfu306wobZAqmAcgPeTBE2P--AwwKJgxwDISMJxoQx--XHYzJ8aVOYc4Ruyzp1h6OQCtEXPiXkqoWN9kbDuBVMweEOqC9g9NLhrGNxzblc37sE-AzqnlxIkNv6RNHEZPHc8JR6ui8-XXumbC3L7f0r1bH_UlJGCd6gWgulCiaNMtIUpFbIu9DfIdIpOyHMxLGWWVynENYBx6Uy2GRat1ZS_jpGpP7NnizbnV_JxAWG3GTdZt7JX-RHHjNZlB996f_xVACcua_y-iESz09I7Qs7sS7UPIVBT7NieR64RxpjE3eCdErjHct7DGyYtUFJASnCFxCVORE5o7qEsPMggzjvERn7OjngR3CWdlR-s9Zgv73BNVwUWws3HYmAn3Yjd5tEWbPg-pmlIIE6wfpIYq5_MPglwAEWP7Zeaqqt19SlvUuXjbO6ddemeYiH1AUQ9dQtVugRrbUDHJMJNFDHcPmxDEOmobaPcsW4D4vRdz0kpypWHjNX4G_VJEYytoUDc0blOeVf_a1OOIb-M9vYdFbiYdaVhfuD_iqO3U45RvHirk8Ll4sqMamxrPjxn5lIzdtGyqwdBKxkNMn-csLAj7io64lxzjaxMGq-QCZhUmhG33GAg1-NfJUrKJJkKn-sWLZpOxY6ff5XwajoXwNxylYZrYzA0r8wNQ7OD-RzO5xDOAESIkpMytCilYxgjwja5FiDZ4AvO4j-9g7lMZOqx3z1P3VwY-Bi3Y7iZAXvnKc1FWpeZkfJlruTL19dbUnP0d6-UdgOJBgXvPfH9chdIf9p3mi8DyF4904ampyabFW_Yuv3uCHeAOigC7xKByG7pAd326pqlfMSzhS3ieQvw_SvAJkvhtWNs-gGNsVYZ4Mk6SGBHrVDhN15unxubDnZcCr4Tpgh--NEdqzPHOq4K7k-zyY-W_2LlIZkjde03HXIW6-M7W14OVVSqENH1zazEeerU4zpP-rQ34BTuN6lTWmfHlARyd_cFXNp_Yybtr1GZgnfFzzXQ33v6GQQq5hzN9vtKqXag36VqFAhEBBexAQWEQQjFaL7yoVSdVEKVo_eMjf-y_3bKkPFCR4pdFWWkWh3Fs8HM2GQ9K0-niYU-BdDPp4aMWlDC8wosDRqtKQ_DphDURohhaDwCU6gQvd-EmcDjQ_Izk9NVvS1UH9N2Um3VLnDbnRDa6YfF4LQo4ZVVWNrOvOvkjbflUeyoBK-ySKZ9LPXyU_-_5y-Gf4KHZP9BNT5UfZ2ZhLURjchD8hW5WlZzvDfFGxoMIotGNvL8Z7-MlOKW_o"},"1e692e3b":{"iv":"UIkcTjP-vXD8OxJk","ct":"sSSI6G9oQB3-PfsuxsEqNsxvXwbdN2yGCaj7i501S5jdWtPO6Iw3kPPntqRrPkBZHvX0VhtPx_b0Hl9GlvO7u37HXXgGDTgt3veNUJ9tmoOdkelozBuIdECnPzYyIAVSUjAEDVgUusBDJfqfXOOSPMz_1OFE4PSKd3yEEh7xhu69nB6YE8u_OXl1zuc4lNV6nPbplr65vBuun7SnJbKAV-RY8LZN0QPNYwZDrP7Qct8NVtFJWFmDib1y1SB9JEdzVzu6rIaWU1YYwton1cAyu_ntR2Yru16VwKkYJOJxFMA9KL5i_8B65F--FP_U1oZMwXXQT_VyDVtNyVJFgVjLg7YcAttJB9-PJucaUxSuLTR8WrolZDdtSeVMjUKhHgObym9mEQTLVv8uADDqXUglKpsk7MqGhKPPkupaOyhvOL5bEQPdASyK-aTdp4n-hnjpviGyBH1VkZOV7EaO3-FYTTOFmPbG1GUFXo9csh4-zXlYL7Psdh0tZsp9SCGPkRovqmA4E8gCDGy1SxyZY-V_P99gO3TMbAItY19if98qHBas7mKe1f5phvTp9XGpmn6habu8gGfSD8LgwDaQOYLYbtmcZo3VrSfgAXMsyORnYGNDzy8MYqZtaXWNlSQ3NXPAsyoRFPoI07JG6szz5IyxGUCostWgM_7rchOf10-iEwZhh-8Tmpl0g_zin51p2Wf6rCoZjFujbo8JNoIUUtjHFd5U3nxQWrYN2CK9x_IFlVMK4YJDANxWGMJhlrwxELa3M1RGXvgS0eSUyZdxLrTjGdbpeia1hIQfnFCe8Ln7xjKSAZ5YFbOyeEA27L7BR31uQHNUwUhokoI3OOjahLVaCRGCGvOvzTaqMVooNt7btfIR0TpXBQALQCuyFX7ezu-Qd_C6YDa56VpZCWtIZLGg62JM1dqi6fNoqCLj0Yqu9qs0NpxMYMoEKEMwp8YFpEVEOq9OhCHT3JwKS7vApEmJ7l6M35yBmBjw9mlHtp9A4M-rM7QIo9QcKn4E3VjW9eeOLXO3eh3qaA4xyMJvAuR11X9HRvOULROSthPg2LbhwyZ1HrzRryuaA2iQOY46m5RakJ6yRmA0xv5hzoMsykqAHNErY8ewZemDiUoWVDyn-e4wnwV0IRPnLlSSM7rHXH0atbyYOuBvvlVjYhJdp9a1lBeg9Kjz7zoq_5yzWrYzGA8cvT7e87bAUFrjjtUyyZSv-MeV6qOXGUmo-QoQ4xTYF6klM1UBs5m0fiY5c90zXHMJP1kL56F6Kw-dcWLXrb01fjpuDcaDENrm0Uz1AqZQkDcCJnXL_DAED_nYp9USCAMRAa37oesQWN-eTucck0s-pV873Mc2l4BWAKnBjA0pyVJRg9NCMDn1CnCRlko4uB_DEsN8hJDVmshmVYbw"},"0f7001ce":{"iv":"pvMyiUe8UzXI5SbF","ct":"OAAjJarNxVuQKdLdkZOauvugU6bxyF4fKTz90_LVw0UjpOQcgBlIXQ10FEgmP6Y1AIDkosL2mSgqtMi_mjk6BSjc-CIYLEwjUXF6hgFWzmW_FT6o5Bssd_GbslTIHROLJK_vg6kd6-YFLFLeRO5XjawDDtpNhh_kSatO4FiT6E6jS9x5TRr0dVvuv2sCXzWarG0rb5f_u42vGgVMWL3se2Ennl4s82fZ_-1NOETJgrdP586om_gg5dn8wmBJS_J-Shkh52Chk4oj9YTIz6JtpZMf4Kd5XfzGu7DaeG7HxvBxUeCf3uKJnrLYhMrqeNM4gbn-Bf0zPPp3rl0gQCH32AEbJN1lwJQWN9ijfuPP0yLQz0z-dczPvqP0rBdluUH3h8TOd1vqQhwoPtP1JnzJc_MQXbweIQbF1lBU4aG8-zJphO8nxVfbsNMqB72zh4te32KPOYR0gpKkwqN_nuWhR7SvurSBKaplKqGx7Hv-Fp-0c0WcEiUNeqy0C52COi-A6u5buAC1r9_JhG0ffH2PVIUYVBxPWYqyRW5udO2CTzyxWBvdfBE02_a3dnA2lLj2eIBtgFJyQ01G9dN2zGJIZjB1iI4EvR7tbi5rBQ1miJB3E5a-yjxAonyPdqmhDLM0Yrh3ZbgabV1uzAfzHZMZwqpQw_UIBEXssUReuWvYCYOxb_OEstCNgg-dc_KsO8KNDfC9p0r09qzqzRA7w4p9gmcdNTCak0Xc2goMZvMKQamz1td-YWu1Rk8XD9uJc1GSTRRmGL5iPAa-ka1SyOG56JEAofd2Tkns7SHsx3Ml7XxfVkjcSPnZo7v8y9gkArqWJB7TmcBuCudTQz9lWFSoctatyeLLqkSq4c1YwGYsFd0rM6x9g6HdjQAqbhrcfPSfefofvTN8Nu1p_EB2VA4unh-SD6IkH9OBP4yIQSTc2lkIBWRF8TzoxWLxTjW9mAlj3iLAFlZM_o2BIMbAz4Ub9UhJazEQ7QWIn-2YjfN-5zxJOShotCNylslPbJtNKUGCs9YAqLy18UIPo3tdjawHh1btdbykxIRLJrflvjLQ_465jKESLhoxb5tmiGPBEFnfgUYMjNQ1yxXd8DB33E3YHNijWePME5vaKjio4dvJPjaJpxq_RJRGFXsk0eBmO1IO3naSy83kjePpEHYMMO2ciwooygjhuKL72BwzPJED7UJZjb4Pt1FGjoXEFIWnbaV07Yb4p2Q3-bKy7w2ofh_6QfNm7H6sO4cWdZ3DBrws86fqw-AEH0ZH-giBeim6J8A7XGGWGNRAvc9FAfFpRRoRK1Dn_HYH5hP0t4DmYHF62fYzPOZlrWRw7eGHhR-7FM6MSuVmyqUaGP75a90iK4zCZzhN3Qzxh2r32iy6gBip-8k6ZDCSVIimF0hPbCe8JS0"},"79b954c7":{"iv":"3_HSF4LyFl_FhTb_","ct":"ujgewVh7fBQZodNH-xC6WzYIPJLjAVaAFbiv0fNGLzH0dFE6RDxMyb-2aXprRje8nXTo8b17l5P5y8J3gCSN2wleCIgvo0SOpG5PSsEoGkjW7Wx_ye66n9fy3MJMtln1s6VVS6emLA80AyiiTIQ9aoRs9WwE61hEOfAzi4r-daF2NEgHUpakuBFq1UgqFKHx8ByYzKP3slXHlcyxv1Ad9BZqJuswkhID9Iebm5OpVGnF-TAxbXejfRaJj03-kXZLTOWHeJRv051Dw2_umu5-gkwjqI8B7WmFMJoYECdS7fN3YfuNgXpSsN8m3ZZtfRf5TQwibhAS3Ls8Cp39rdM1Iszc8iJlyRxIj9J_WSFMCBIKsE2DVOJJJLPPB5WyXK1HV8e065y2rLYb2itMKLSqzPd4CYoBFPeijgw53_OlRm_N2L2brZmLjJUNxecZ3YVkmoeUUF4oUUreGVCfFXeUgJQU03RBcsCmCRHL93Yz3fv3rgAYtaeNWYIQVX3X7nZaAvW371yQLVhBqIjSB2EXGzY3nLpEzRnzSU89d1fMwlZSZu32zSVucHRjogU6667IxJMkJsnvl6jXa47czAbzu2B-cY1KA8ZVzV655SZrUr3CxpZZvGWEeNob4IQoW_blOO0pVyqjx3rEfkXnAuO7rgbacI9p7aIj6ubahAEyVlR8NkfnSkROc09-qwSnLvOEPTtci7tuU2MZoZ4f1gKKuZj5BQUhaeKy2aOSXMeu311ENDyKjUzSEdXkpxq9ci4Fk5PfePNE4zyH2_9Z-LFKddDAPMyWnnRwnUphmwRibXuW_CzHE1lt9ukUcBIqQv5SBYlfY2WPlmx4SBSonUY7kTV12xGl_kfiCcwNp0lrpywVUe30Z5iJWJdWfNxhoJilyIUtwEyVgBMjk-vowwAFIVKiUao11CZIhm3mW2ZtirsbvXuDc37i7grOoYiGqLuXOu4P_IdPYFVf6IspPfM8XmEAxOVI_PWz4k-VaXbtv33rMH_012aB87M7LEB2iGJQ2fS-2REVdtnTouolBcIMtvln45IWwzMJxseeM-aNSISzdYLEyR7L8GxldzfXqOH3w8VJ5cpBjd4IOy-9CejL2rR8EhyqOc3Ss30UTRKpKaDMBCa1uYB_q0NNEHxNKJ4zsPx_vhfkN8hPr1bbePDkBtNaAp7dXggCGX1Yo56wDnXva7TCgDfba_p0cZxGSnOLFdcTDiJHmkwCQ0POm2m9eBU3uxO_nE4BFN8j50y6IIr0ylW9ldNat_SCZcOqKxPhEu5-cqH2rEJlNVYZaR8UgG_NJukC8cG93-fF7XG5ieYyajZJzgpxVrDTym2Zjno_BvoplPdzZgK2Kmb_Riuu_IupP0TJ7kahdWYbyx0fjaj7"},"96ca1478":{"iv":"sp5XQNDyKxqlFRO4","ct":"SnW7TTkTfQMCblvsmQPtpJZVttmmHQ9vaSRnuck8Jy7knzqlCRZFbFcNcXER2tby4zyzDXJtuaLzvaZ7_RwNh5oyzaMXb5lF9HT-GF0xk2zsz_7liGpkvdnhj-iNPKV9SRW2qWIzj0Hy-dtTAmAlkqgKXRuljnDsupe_9NJq9UL5O0KNdgOsW_Gtaaa1-ElwpVmY4Mf_oTp7abEfIq7UqXS-jMRwUvfIheh-cKo84jlDiiGeb8asi_9bEL30u82DCsETA-JfS-phk5FD3TiNyCDpq9LpOaX1QVt2_bx7A_Og3TBdJwZ7e53tyADnKBQwSWxhw8hlfCS-ecUWXieed6xzTUwdkAnjfxFqPZy6Sd6ycizuscjuVnr046jxwW5C7fELOP23PyI4-EyW2n6x8j_joNx68IEbStrtJKTVNgs6W_jw5nUkUXXE8Yu4T1NJmEsDGPZMJTdcaOynxQFiEwS3R7lOXzy6JA2UwKvWGtqvDSBLlb8OvFoX0IrykjSAOP-Am5Cb4iF-ZjaNtiNysDJvLHBKpbpN8qM7elTi8xrvjMAISI30p-Zz7_I-V8Z2Vw4YHdkAp0rmw608kPvQpZ8vKCGln9q5FmeMeMB_rUGM430VilOxQHswcqRWwJt2LagmZvmIIxfVT308Y5xe4F-ME-9UrtJkV_29blh0olzY_vwnfT7o2OUhOQUYQxCe7YehBKJhS3lF3aWojmH03mw2xAloFkmCVYcLuyPH1E5jkAKFyRsATYPc56Awim_MOHuWKlK36jiMdXW2BxPM3fOOCVASprPMTFCLnP6Icrg88rZ0LXql7sIIEa7XUc6tqj-W_xBJB9m3riCxrt9w5SbswTqfS_h0VVM_7fUFwuUD1IMRNekGLUzV_Acs_RhdPlBBLK7Bx22pGCEfTLAG-fSfN0Jdpb03MCSCI_PZ83lbrHVaXZ6jMD8ThzSq1LdGxZhe6uMxiogd5Sh9AYJHlpSiVO5YUV8OrNwGB_CGzmrAAoKMxRyhA9Csz2GvPgI788Sy85wGwIlOaoZOdOT1PtE40vGDr75ng3wntyNgL0vigHqPn099jNv7kXuYggpT-T2P4KhsVGrLoUCdqEbj21Aip5UFMAbIoH_8NEsFejyCPHuUFTwFphmc2Kzp71RFFPijHe5x6rhUABWttTryPnw4h50mv5rz5MDNAtNGEuZp061eC0qUKw9Sf1jU-xR9pDj9RrViumKlUfU8pF4OC7JjVEalFu4pmscp3PnyAyuceQhwrlniAjFWN0_7ygn3yvwlX_yNoXTffEYf3HThfAptC5GBf6Y1UiyhULjvyFb7LQZkx-MAEEsI2tM9Qk0sqhU0fItiLtcPrDP88LBggOn5xAHj-vJpQZNIx1ITHyub0_LKcWr-PvTy2TmtJeST1e10dj8bGQ"},"2001977c":{"iv":"c_UP-n5pD9oCWOH9","ct":"l3jFrlhLTeegYG6g1mjd3I8XZ-WhVwjok9Tl4IvZRhA5gYw7v-_zl3xAdK9z4MaCbl7x2BgPA_qSPu9SCgGmoMojPXLpRjFYrN0b37QG1XAEz14itmJF2XYssIiL2A6ezOPo92Cu5AGmFNDcE69oorEJuvsgZia2LiRc725H73ga1aD_IAaJzk1yvacSW5nDlAdVVrUXJbfsXHEyUYfVZwSQ2AISrLNe8SC0XZaO-ZTyJJ42PpCxcgmQgps61NaO3bg6dRVyRg1vvi8Uvl_gsNkgRQ9quKfy7HcMs_tcGHv0PUoAQkXL3BsxlvynhVqVEOw1ZOp3ievcfY2o4cw-FUlOOIVAofFaFGqrXfA6v2ZHNDNeTJnNheEwU-F_A1wtfgMbPgnx5ByS14fiJb77zj3HkALgvLRI8e-Gy2mNmUOoMN9AJ4kQtImUwtkfXio3YzoeAwEd3_IwEHoZqAesvMZ1NnOY0sh4lKGC0SEkfh-bNndLxd2Bkt9mHGXfKy7C_NksrpZoufLxYQiM34kY6Cb9dOvGEKOj4J1rZtXw4Rsux-YJ3Xm6XD6iCY5mNL-Rh6PrWPRRP7FmI09yHPI_ANWroYepfxwrO0Z4x9n2IhXW_gg7MpSiVq-U8vqCPIwHwM5VKVxYF1QKQlmUQBZYp2dmYjt8PhsHSSnBetmwg4gCzvk7duAy346yWkRArQWo6OyprcJFMntleN7Hy6rSI4fHeiFB3KIf6K31Dd8BhwQYjxD24nMKZdEmEYGntSY4gKFt0dQ-kVH9QBK1VJd2bx9hRQT64QgXMA2nh5w4euNjdUAOqIrFlol9VebLIJ0DqXdOEbqiQBWkl8iMk86ih6TEVF0ZtU5ueg5psq_kpuaVjH9uxZFRrbLJwJ3ZvqqFa7G9s8z7GCSh_cuPm5CXqNuavX3MnaoVS3VL1fDiIanroeqHJyt_gsj-kaBgeJUN1lSVYwLIg6eRxANjS9Sr2bf9WzSj42FBaKqQrObWWuDOjYhWHjKQl0lb2MmCGhwIhtMOukoX5mkpzh8AOB12gEoKUZPiALu1a9eSTxrB9UEmWpOJmHHR5XMi72qhG4t3yc4xU_LYNmPq7FA8T5N8xm34Wi80tCdE3x-PVegC2YJF0cKsgoNYL05Pgk07S5O9TbHXQJOpB1am3YatN_ThdqYqVVxj47SaTFT_2-x37OY8x2-YvA35KaQ8RIx3RrZVar73l4WLZ_lYjuzYRIJR19Qd2hkrGbUxh-59wvv6sGYHm9ee4Rk4mmhSsKO3whPb9MwLzuI4nIRDfyWnL383krIks3DBKa1aAzn_BuKp6_syr_9hxKYHaOg0RghA5nZKOqefqNUCYWJNWb9RG1q-m40xgfouzNoi6Xtzqa938w"},"ba8d91dc":{"iv":"msoeLZINsHM1jJOd","ct":"7gi0Nki2aRj89OYKhGIYyr7_X3J2X-ybgnB-ku9ncufZNlm9wkOd9kxonJ2Jlgna_xO_JNs80JW2GNvx_xGnkXdyIxoqZzZlvfarnOJgHO7ivoYjzE3n3llGIpF4upOZc-GlmryPS8XXg0-biUzPJEPq8iVdsEm69biB5Lu0Ehf_IRtfEKRR_bTaeqpAog0_aa2pIwck8ECBdSGPzpKxr5hH3WqLjsq00z-gFJD8CHkIZDgI15NVaqRN68Lg3qJmk2UjJRx1wvAVTvto5LaEGVV04gs_z_D3gmwznzY8zdkguUSdmqlxRv0-uh-9XGMtKWwU4kcj969N_c67mJlqXje-L9B_BFToqbT37TmjOl_PQvOmGGXUby7-oC1H_Fa1iQnHDpj7ojr2saEeVToaP1M9HWEn7vPeM_tcqMUJ5wzt7Hwizefzibfeq_sPsVaUJA8o4CRXrADYLnaGon_FrTG7kFCWGOmJ5GA8gjBm2Tp-UrMTTC_dpcypTINJbn87w_dr4itXu0xoOzQOQX2JC7I0h2IERGpUXtyyt3Fnd9YyaXxIOT0lEUXSCkFix0h447sJp-B9VMEeQH9IMoSSZmB_TbC3QTz3fWfT4VgokHftQGauXgx7WH_gMRyG_-siM9PH9yGHvgO4KbQQ-urJ0OMWgknDpVbktVjvpTbW9S7Fu44Z2RbKIE2Af4fPK4aIC2u-mcgcILjcQ72jZycaQvRKdoBUosyn4Ehr86pwMGdJNz-GGYKb8tMqY9RfiOu1ro0vZTC3o2q2u6WSpPT3r36smOxAci8sS7bWHrMyHRuMFdvzWwPNdbRuoxwbezUu7CwiZs-_BPPjqDTw-cx0MIlOegaIasLlps3LsE4-iPBGMdmVAMbvD5jDX6wTLkJM0t7dYqAyJFa1c28JVry_IcSXYv2kTXKktW13Ww3OQMIY3HUxdlD2ykc0w2Kw-3QwnrFHgHfgGIhuX1iwn1dsupXNUy3Qx2hL2a5bU1KAG784qkPXPkWKb_6awAydlluoNha_k9Zrh-SH50EPgzV9aTSHEqJKBOGPtxjU-MgODIiH-LpjeKEnQbtowKQ6lUNziItldh8SzLjU4DK-7UXuYYnY6lq4JH3dtgzdfSXiyQ3Nqh8bRVNAET2UId-t6iYeweE3Y3d9J3HXYpCauq80kqJkKyg3cJxN1NpDFuvEZ80xNCz83nplvNblEPxAxWo-i1_Uw9q1UXneSgdy706LjjY8NO7lpefVYRmk7HS3bqDTHaVgKnO_aiICHzPHb5Fzxh0q44ygKYiEnuDuOKMr3OBXh-0RYLU7_hqHZjmkSmIHBMoKhyJHS5138EeZMfhD_MivjBfO3TOgrURGoaBuytmaGjN2digfxS3mjK3nx567"},"8f8f8b1d":{"iv":"ry6VKsg38wimAn9t","ct":"fWmIMgimsgmfdg02AC3T1pd72BVrCwN6jo1G9YqG7XbtUVQMnxXf9W7pYW1O9qPSspMwJOCno4FkI6I2N4rxFRjA91wPEyp65qI62Jr9R3eIzY-smk5ow6anhZ7NAyHoluyz8r4V6dWBSXua8L7sRlAQ-18rx6nqFKWLL0oFrbu3Z05bydlR4soH-rxoSIuqcgrz5bgrI7kdh3Hch0HktG1UAPnVxdQKAegH9FNYfDXqMDOjOBORuFBaXk2TErxGdr0Ip0DVSPwrhBqJq6uSULIjhv-nJLLk4V3mObx6Z01PsN-Bsk6fgvbibevABPpHmMyyZwP7VeaQ_vS21HsYmnxr2Kg7KcyUAoXT-o0ObSKqnrfPhj9qwqBco7VGD3d5D3JMfo_-iIZqvIbkMzNAEWHF_E-20aySClwecveXhN4C0GntYFcvvdHxTpl6rVTOsZailJhZnnL19h-lNAIia31_534I6gqGLI3b0Bcadn-WGgONHmKHT0RROvPuxABWLuPyg4dmSZfk3UHbsnPM6GTd2dioeqEINtKK9Rv0a9ifUE8pl491m3_34VFvFHT76iLALyjKrqfunFAjiQZzZ1xPl14mzumcTopEw5JQ58u0ZtEUXCOwe2GyTfpmKHGwajyTLbz0xQWkag9lPEAvHNA6TGYKRJuYMcAj74q9E-SLqZrBcfJXlRnv4aPo_lrw7cX1b0E4bnoqWK06V9ubAjQNwpfxXge1vFtae-ero048s8MZon-fHXxFcoGpD0gK73A-rSB8CIAksAKXBkBEwSTm_L3Jg_uPnikUSD1cELjVyQezv-iXOJ2uhhQCD-Ft0_Ufh-WvnPMiwzdDQDSutl3OHKdKaehIwsKxfbYJaZJp1Io2aCuDeXW0jvlDDyIm0QbC7wSvGkQD-VDt7vDQyb4MMa_NvENmUNoJ3AjL5Tspyi--R5vxnta_z1ZWzMUprqESrYCrgLf8oUDvmyIOxZmxSDUsg5nhQdKYoIZfdiAm-yRYVqOIRMutSlHzIPSYByxuvTnIb4YQJQFLerC2ndkj7l1PM6IrFO5KS8qKyAEnPrcM79kQAjuaDmZsHs4-1H_Zrli3M4muMm4XZcmfc3H7ogemWrcCcqm2ywZ1YgD1rx7rvX50AhUaqtCfNpgcRrHlB-3tV25P7C4IUWlvQWX8987Ah3_JxBbjBO89_WlNwuWDn9heQGCEbAUSAm5Va26BWZ_6GiT2iKKYYG7Jj10DbBxVpsHpZ4QkEi1fCAVSL2oMVG-MMlW9Hx4E8n2nlWebqmy3KkAbXIFM9runhXS92Icc0EMiTjM4-CShv630jrkkPjpFqmYPg4eFOnfOIMtBI3AjR-IlUmpgBW2s_50SgqF8yPCERFUvNUA6BGHUuxcrx5HlRc1P2UwKb5kCRELcMtpBZw"},"1c0b8963":{"iv":"VaK-HII9YvN3pbgZ","ct":"EchZtXt5wItMyDyJidzHoB5dV_OA6zgm7daAxHqg8kc4skW6wRNAmLnIEfGgnXrGGcNESrLM1rir1BYGRv2AQWsbS80BoJmE99ZuRSywYyszUqmHhLzghxgufA9vOdE3ZsgQqxkg1Gl_XtBqsOcuWNCkPEZyMt_6arTymaUdk9FsXurZQQ1J5b7l9TBfrAXDMW_kF4kUpwi3Yp3w22UfP7-IgLg1IVx2Zini2asrGBBmWy-S0D1dHjYZrq5E0xYnMjDj4Ev4K7B127iG764I4v8NozdBYz2q162mf9M8tEs_5O8Surv9ugoRDXohc9ijoZcHj24QFV_0eBNupjj3A9NYzKV59RGQB9HoqGDXkZajbFKB8JAGeJRmKybxQYbKhh2X1Q54eHRXvvnQRzQIiyb6ElCBz9RoJkRiTWk3kWqnRgrfiOo6NBc83Zl-YVcOOCrYTFqKQNsXIrwGYM29tO5jzVPpwMy16u4_VApZ1jBM00vBv0h2CSe8aFwkXVvkHmq3L44UaKVpw8hZUoKOS5hDPSLGWwfkE3eJz_nozefxJnGaiEXmloSWgJdQ0w_9r-Rg8XXWcH-QQN01NoZMVHRDtnBmjZgGR85OgTPq5BB3IilLHMUQFNsV6VFKjEJXTFz2_lo8EHTwoQAWS9CAE_m4N9IXkqIgrT6JSaPjjiMXFosEANoLP80k3pc5uDIB4QL3rQQS-WyIyxAZUY7q3oNOL1PKBi27slDl3HGC9-i1N42xtaD2titMuK2SbkzxWeCzUrCmMupDq2QPF1vXyjlSjtQzQY_oK-HRsXOSYNsqs-_6qGn7j397lVTFupqaVGuq7IXoP0FtDzkYE0Ma2THQDjC0ukQxFiu4eHxGBNDBRza-y2Axq42GKtkULqrIE5pyvR1J4_xLMGeRiK9XhGc2uMmbrRbOOBUCTQBz3Yp8nYf4TwKRkTWxhlD6dKZV0tnGokm1I9jtc-bOhrol5z_6PXKXBPZG_1CDb3iJjy2cSqrHlpcwfjsO9tcVyZ1l1t1GlfDXS6uKXsJjJqDMwZZu8sXvM8H9SvY4iBH6LuyHzIkIXejLbIrsLYGT9T3mNfiRhAkJXQRBnHJSmSuj7sQNveiwfV07LgiMYOTuPVESrprebitSmjXlQV-QLIvdGLehbL6Vj3jocbekC2ywotIlIDDGEdmvgdF0EhXdzTqeTfGmbii33aZQgCKK4E-jfL0dVKxst0panfDNtih44dd01FHhPLccKlvQfOESVT8apK2G3YDatPjdI-_xXUf3RMwHL3tl5Mbd_deIn72Mf134CDh7FbX2naTaDgkzdIQWp8Lut9EKGe_VTuizGNNRS4daNNBV0oaxNdfmXK4Gp4-4XJ4hHReGxnUQe90IurqZXh5SYplU84gfHpwarFzjsFuZEYV2Hg"},"aa242cdb":{"iv":"xmjZVPwK70dPZ6JX","ct":"yahP4AyRd3gePYReW4dZC56BlG1nNWThxY3BLtAexTtn5vR19CtYueW473XNvO9C5TV9waxPBHU8bToT--m4zF5lXL8VaxDjlPbJ2ubdkdb-tl2udfcVnR0QGAj050LE2gM1Nggb4oJfKaw-yAgv0frwzllVIiSPX7UIsba1zH8cut2ehRfU57NJa7NLvCTkwhwRiNjBZ929u5cpy1rxZNggcDayFCqrA87YKrfRw3NtCakurRsUicYUEYCdqB8m1CBwrooDoPHGh4d-agkjikJzs8OofZ8PrpTYuifSGuT8oqrfE6coU4ItHiO9Ai6e40h_FtIigWckX0J59W_Azs4Aa8AE-CMGptdUJwMzySrNbCmZs70pIAnC4lbPbU9nRB4P0R3GBnoHBDh3taXuiOZ80yytg3a0wf-sFH218BadPWBgQ1LX44v9XLnuXrAs053HVO0-eXlCC9a-r7dAwm5JXAqnZf44iRXjYX3j2hFo1BdYrpw2UPWhnzMbCp5SiEXfHsOjPTmKfHAQEuJEtGmugJ-_r1amTGnaElCbVvAzZLWcvn9IxJOUfi0h72V4kryRMkYFT4A7vh0YVhoR_t6Sl_yxvVJySn26emkEuoinb-Ti8rCUfh2_3h744xohrpefo92v4r5tfjFqLUlreRVTFPaNTSkdTPrpFa-byJTVq44VjF-vdEQOfIEuXZqTJSwStvU3DAFDFV1uSE0sMv3l3N_qSt-s719Fexfb8dlHkDvqEaezmX361WNHLZplZX_KmOyY6Xs8G1ff2s5HcynjXgZHO2zfKXP7Q2MGWd8I6-0w_BNe2Hs1Y5esY7O4Zp88xAsJGvNiF3pj0iLYSPH84LY0bCDBlSn7ApX5F0EcfTK7S_kKoWXYA8ubNsd5Lg1GrneuzVpvkqOR-4XsS2KTB37ev3Kohw3Vel2bqFLTh6I1Cbz9sh7iBrv4A9Co1wHn7DbFbUzD-n_OzMJ0aeiAFrpORm7m-VrTN6nwYjN5lyFjoOgieKbzqXkBxySJKt-ajQQcZ9sGUDXk38Gl5v6Npv-WJ3JhBjgtd-sV3P-nZd3smVFgt-zKdVNQv2O_YrQ8hfu8g13nwlO464np8OOJ0qwD4lWJPLyWh7wcsOcdJrNlkIxN-BsHPyQCLTkPavWMEoYChEm2tmRGbRILNnaGBjFDohDUW36ssZYudWY6HAAWU_DtSMAm5YVH-2ZhqxOYO9GIYfAYIoMhm38H6MZ2KXqbY7UUon6eHyrPoIUtsxTsYXbYUQKeAzMvG57A88qaoWZN5YFGE92ZFYXr4rg_TkCW2cEp2io9RnRla0NW8w8GLI95u3WrTyRC0oX3iYymZ8g5PNKBF8lS6hCvilOg1Y91097_asvi38MR1g"},"5bb183f4":{"iv":"Hg4xXx5iBYIFhq6n","ct":"CI1Q-Hl-eGlid8G-LDSGcnOZ9J4PgacvXC2iwruTJ8r-Pcipik0YXkIZZV2USxXVP5z_sebTAQJnR02MPRbEeVQVPcONBzaZu0KwQNyfvPyXwg0ztrlyp08mKzh46CwIx19IoB3nzBlGm7dMKIsh1hT-N4CuNSPffqBnX8GpQTl1-GvRM9oem6ivNl_yOAueXCz1RgmFiMdn-ox4hWowLQCe3-acPBedRYu8COyLbfdiBEal8SCGl1Zrl0YRmjswAsaB8SEsHhOMlowUGBzzj70THqkfNBgKWaYpwEhQRu4QyiFETnl1k-QTBVYDS82Do3PHsuI5lBdRrny84VpXxqNVrj0orzf7kD_k6pZxJax9rTpUnPMpk1-qJdtoiNIUlmeLliUOGZH2pHLJK7ryq5ESTCszs8haZjjRfEmiHIsLvSBn0JtdTm6KsXy-paXao8vLrjGxuASRk57EJE-7gTlxW5yKBYDGCFDDVGV4s7cs8mUcbv6lv4GGVY1RFdvjScy89sp4ERjYW5SDUq3sZokppDQhXqXQwBqkVpPpA-d_C6pT6TD6JGeEdzIcwXHbOy7pBeaHGSL1Wozg7OYHJ0mO17OwUEYnRf1jtVp9rqFZ-ZFbWJxLGS7JCSc3S-D9Vs_qi9wfrI-RanMsxpfF_J53MXzwSYnj9j6S5Re1zduVPl9zyGy0NSesEU7za6Y-2GB7DdSMmJr1rz1UX4LsYcRL6mC2hLpQS1zED_vRN_DEclI78u-lqrl6o-jguD-RuKhkbbaOz2ybDQN3kgXMiZ94ArJsKcf-KCXkLQqTEmci6i8-rxImRZcWzWfQ6NEg01DuSV9zDVA9Tdcx7HvvBTB7xyP-FaRAGut7Z7Ge_cFuEi7CTv2XzTgzkZWvhNV_ceRjKsTdLTOuUEnj6B3p_KlWfOHK_Jt9DMsK-GiAaaFj0vXYeCFIrN7PFHyw5z7HTcoZnWksDbm1UX2Gw21rnI6yVGNkAu-KuyirJE2_MEIpvMcyCpRSuMH_V6jXZmMF8rekQXX0h4j8Ez7UuoXnuNN2847Zgrbn6_X2vextzY6D3HhSr5nIwLYI7V9Xd_aAitfkb-K7MAIBjdRjczQvNM6-D9woseZ_ulk4VYGjNaphyMmCRIPGlQHg9KVXFuSzcGzHA-CJeL8iOZKOVAMiH0YXBYph7OMiHwJm2q1u1ZLdyrEBmxD9bnfwGT9X2h465G9Xywumbn1hyaoDEN0TmWFcOiwLKgMRbgsOObSI_WicaQVjuTyJrmrbNyZxErgeYRulJRD0csnfAWvXyF_3cp_zcebBZ51Aq_okcyQMPVnTBCxqu6mGG-eoRDeaLk2jwkd0r3mqN-k4LqfUUCSJSXztJQxxWtMCb3Z39NysObWU"},"5921ff6e":{"iv":"FU-_tBiHMG0hRqni","ct":"K13LC4kL9m7HrJWcqi7Y0NpZ8GSGLvBJehuZ6oHM0bDCMbiJn6MXhNmXWw0lbgUXAribfSLk2-qqbUlkReO-3rnCBeta4FHGHzSIk71otw_fRsYLBEwuMijWr6WCAPX0CEnaLtGKBTDkWvTG-0zJvDSNFakVJNojGK1KgSb7lYRiYkmxM-26GulmCXPT49xaXQZjp_r0yUsZDkCG_A3cGCLQD20bKPIbMFH5wp9y9N75cycJvyhZbd_OeGVpELk3yGs8jlFsYMjxSaabB0QD4Yjp6iw3qGwli2aN7DlvZJbIAOSljMKNso71TKjW_a2l_BjKkFeoKBvkEuBNMWdHn94Ht3UDgD32RiDYEdsU4i-Gj-CXxJ3dWPQ6odK2ff3_9BcL5oBqTaEeQnZ52sQ14_IhMnwTwObBckVQ9LsX-E68VITM-gC1JcfhXAdiQrmzSFFn3-DUFsRsTp-U-vn4-qdjKH3OE_tNxHQKskTpWv1dG07fZ4JSlcoT6PUE4prhd_Ez5rsJmnKiiRbYnMCpBoglYoNOqQ5TFJ7_x-wypr1R5tGo0WIqOROJ_wbVg2YtqtWOqbPhSs44VWsnw__y6_Xp1i-6O53tFJPhIRBLPzc80L_OkUFd9YHNjvxE7g8K6u_IR6p6wfF-fqJjI-N6PVESbDosYh6Pyi0m8PIrPiXPeOVZYB91WJoK3gnNE9n7cEH626ciYVaSPzzhM9AB9LOMwHqrtyaBQe-PEwCwy6CzpjZ8N01awtoUG1YcGsnThRkOIe9BgB7oJI62TcQLWZodOhAq6epVGQ1DZnRCx4LvRcm-BRI7XwRQhJ89Ifa6Hu9PP2b8jP5idT5eVgjkoOaOX_RQ6uBoiafIxEfOmLuPg4o6xz6zYiDlkMUEt3JIb4YUoz9ye1MHkkDR9gozYyWQnPVcdE3MXAwW8jEG49OCpINUlq9Ki1nrM6ihzYapvW_eao79w-mhgFOaP6qd3PmdDHPD2XHNW0I3y7SlQ8rzdPXGZBokwvOUehW5AA4M1JVtgVN4zLZJVEVLnakBmgEzqCoqzeHj-aDrBsgk4Eut0YI116xxbmKEsJz8jgQ19ofvAtJD8_9AugJhUbkrHojDWJmEqQWyS1--8m9cnB_wySKc4qHkNSr9qcXvBz0_WwY2f7FzKNSwnpI0DoPV-DscjXDWdXeqKgm7iEQd29kbnLnHYanW-WYZRHYFbau9B3Njqslw98E563qhkDpsfe8J6Pg3PC-3Vz9NfgZNf3pG8fWNooOdQNfBSBHHmJsNZ6FzhKvNRUPoABK4ouh6sz2SwVSrKKgzd70okMqcK-Q-NM8mUX47cEvZ0WKaeItfe7jqq5hms4JeQLH1XYRFV9J4UjT-wodGwXEqoWc_4ysiOQJksWK-AlUAGPWT_NIyygV8KKTsVw"},"4f86b429":{"iv":"OSciOltk6T5yUK-h","ct":"GFneZumeK6wS4Fqz-WnXcFJtCd22MnlOnImK7PC5qkQ-TBEcQk6WltGVleYS923oY87Qq6-qYpkDQ9Y6EXMvWC5fobst0P_uMcqBiOe2rhJj-Rgw71pLgYLiQAfcJj68wAXJ_8gA7kGQdjzZyRQoHiN4iq2Y-OVkOsxlbnXdjyOE7dNnSHXsJ5SR2zbYx7FdaTJ9e_5D1oOH0ZNny4-gSqIroeBVVhTcnnsX3wWozYfk8Z1CeCxqwvhCr3jNR0I0Yhl5_zYrqy6sQYxW7OcY2RYh9tzv7UjSuGRQFnjN8h6d6MzT3-Uc3oOMbnxv-9S_Vm_IfP5aA5UqQZtpaysiG5NWWhS5IsdoB8qnUee4saxRouQm-qPkELhxfd47eaBS2PcUJbnuKWQhLdgOUSt5GzZmqRA1DL3fGKhGSDbUkhj0MbHbXlDM97d0ocY30aXhkvMvVWALrp5IwJbsgpot-_JqNTeQruHjqw9VJPvQzXvQmnacL_zzyI3t_dxUdqF64PDNbGPgxCrAfSu7x_5TCaYXOYMVLSNVikMGHZsxIkayaE-GgZqzw8MQ4O9tSKSh-E_Vs7l_Cvh5M81GLxe2B5TaEMOVx2dcsOtCDcCy2qofGqQ86RmNDvvwPmeKiq25H30ikl03geQT-YJRHMIsNGzKyctLH5eN9ljMp_UHCRbIZ5Z5UnDLFxht04jkfwIRw5Li9_-RaoF2OOb0QA0j9cqeWAk0dQRbxxrj__nkHHOV8J88mWhJVlsZ89ZlAeBlZuHVIH6vR7vsXHboToM-86QfKuPFkoF1gQctkQJ40d6gd1Pdxdwq6HdGRFLZHJkinAXde2GfKCP5AfmStDt0m_i0g0SfCJIQO5Xw-ehmZDyL7LWxechTVQpWqmVjuQX6w3PBWB0Oqc-KmHffGdpSv-538JFrT9DFc4STGt4tpLHM-xr7-6LISHpoTTPiCicb7nVGAlFht3I3Px71LW9U8dRufaqqm95xJf7SM2sAhxSJkLexRwE_dW-X5v7dKsNRoxxloPXkpgdcVLSahPN_yn2dK_swo44z6xYy8NnxDnhXb7qccJsl7r18Lbz16WUkn4pQKg4eM7DZ0Tjs5XILvdSZZD3ACctcwuKlsBZnPdwD5h90Ys2YD1ieLYAejcmd82kdtzhCXXcR_4McaZNk1O8uclxwml8hFXsgfUQxIDvTvnuQ-aMJ2NGpm_Y6oky50yTE9c9iYeXpYDSuMeOahWLoUnBX07zcW9aHLtrwB1L1num7szS7suPqmqZs8FmahaC707holl_pv_6lMNF8cYEUBFzTlAj7FBgsW9fzTdN6PKOQgVLrH3teTE62AK-PPGHaDPXsTGRyleRWFP3qq-BgeOUajAGvSidKiV7Dnw"}};</script>
+<script>/* Wizard: unlock -> where -> what -> steps.
+   The key lives in the URL fragment, which the browser never sends to the
+   server. Nothing is persisted: no storage, no cookies, no requests. */
+(function () {
+  "use strict";
+
+  var state = { profile: null, platform: null, path: null };
+
+  function unb64u(text) {
+    var padded = text.replace(/-/g, "+").replace(/_/g, "/");
+    while (padded.length % 4) padded += "=";
+    var binary = atob(padded);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
+  function show(screen) {
+    document.querySelectorAll("[data-screen]").forEach(function (node) {
+      node.hidden = node.dataset.screen !== screen;
+    });
+    window.scrollTo(0, 0);
+  }
+
+  async function unlock() {
+    var fragment = location.hash.slice(1);
+    var dot = fragment.indexOf(".");
+    if (dot < 1) throw new Error("no key");
+
+    var record = PROFILES[fragment.slice(0, dot)];
+    if (!record) throw new Error("unknown id");
+
+    var key = await crypto.subtle.importKey(
+      "raw", unb64u(fragment.slice(dot + 1)), "AES-GCM", false, ["decrypt"]
+    );
+    var plain = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: unb64u(record.iv) }, key, unb64u(record.ct)
+    );
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  function linkFor(button) {
+    return state.profile.hosts[button.dataset.host][button.dataset.link];
+  }
+
+  function branchName() {
+    return state.path + "-" + state.platform;
+  }
+
+  function showBranch() {
+    document.querySelectorAll("[data-branch]").forEach(function (node) {
+      node.hidden = node.dataset.branch !== branchName();
+    });
+    show("steps");
+  }
+
+  async function copyText(text, button) {
+    var label = button.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "СКОПИРОВАНО";
+    } catch (err) {
+      var area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.left = "-9999px";
+      try {
+        document.body.appendChild(area);
+        area.select();
+        var success = document.execCommand("copy");
+        button.textContent = success ? "СКОПИРОВАНО" : "НЕ ПОЛУЧИЛОСЬ — ВЫДЕЛИ ССЫЛКУ ВРУЧНУЮ";
+      } catch (fallbackErr) {
+        button.textContent = "НЕ ПОЛУЧИЛОСЬ — ВЫДЕЛИ ССЫЛКУ ВРУЧНУЮ";
+      } finally {
+        area.remove();
+      }
+    }
+    setTimeout(function () { button.textContent = label; }, 1500);
+  }
+
+  function toggleQr(button, text) {
+    var existing = button.nextElementSibling;
+    if (existing && existing.classList.contains("qr")) {
+      existing.remove();
+      return;
+    }
+    var code = qrcode(0, "M");
+    code.addData(text);
+    code.make();
+    var holder = document.createElement("div");
+    holder.className = "qr";
+    holder.innerHTML = code.createSvgTag({ cellSize: 5, margin: 2 });
+    button.insertAdjacentElement("afterend", holder);
+  }
+
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest("button");
+    if (!button) return;
+
+    var choice = button.dataset.choice;
+    if (choice === "android" || choice === "windows") {
+      state.platform = choice;
+      show("what");
+      return;
+    }
+    if (choice === "vless" || choice === "wdtt" || choice === "unknown") {
+      state.path = choice === "unknown" ? "vless" : choice;
+      showBranch();
+      return;
+    }
+
+    var action = button.dataset.action;
+    if (action === "download") {
+      window.open(button.dataset.url, "_blank", "noopener");
+    } else if (action === "copy") {
+      copyText(linkFor(button), button);
+    } else if (action === "qr") {
+      toggleQr(button, linkFor(button));
+    } else if (action === "switch-path") {
+      state.path = state.path === "vless" ? "wdtt" : "vless";
+      showBranch();
+    }
+  });
+
+  unlock().then(function (profile) {
+    state.profile = profile;
+    document.querySelectorAll("[data-profile-name]").forEach(function (node) {
+      node.textContent = profile.name;
+    });
+    show("where");
+  }).catch(function () {
+    show("no-key");
+  });
+})();
+</script>
+</body>
+</html>
